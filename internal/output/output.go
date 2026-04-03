@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/alpkeskin/gotoon"
 	"golang.org/x/term"
 )
 
@@ -25,6 +26,7 @@ type Envelope struct {
 var (
 	ForceJSON bool
 	QuietMode bool
+	ToonMode  bool
 )
 
 // priorityFields controls which columns appear in tables and their order.
@@ -51,6 +53,11 @@ func UseJSON() bool {
 }
 
 func Print(data json.RawMessage, breadcrumbs []Breadcrumb) {
+	if ToonMode {
+		printToon(data)
+		return
+	}
+
 	if QuietMode {
 		fmt.Println(string(data))
 		return
@@ -66,6 +73,12 @@ func Print(data json.RawMessage, breadcrumbs []Breadcrumb) {
 }
 
 func PrintWithPagination(data json.RawMessage, pagination json.RawMessage, breadcrumbs []Breadcrumb) {
+	if ToonMode {
+		printToon(data)
+		printToonPagination(pagination)
+		return
+	}
+
 	if QuietMode {
 		fmt.Println(string(data))
 		return
@@ -82,6 +95,11 @@ func PrintWithPagination(data json.RawMessage, pagination json.RawMessage, bread
 }
 
 func PrintMessage(msg string) {
+	if ToonMode {
+		fmt.Println(msg)
+		return
+	}
+
 	if UseJSON() {
 		envelope := map[string]string{"message": msg}
 		data, _ := json.Marshal(envelope)
@@ -369,6 +387,42 @@ func extractKeys(data json.RawMessage) []string {
 		}
 	}
 	return keys
+}
+
+// --- TOON output (Token Optimized Output Notation) ---
+
+func printToon(data json.RawMessage) {
+	var v interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
+		fmt.Println(string(data))
+		return
+	}
+
+	out, err := gotoon.Encode(v)
+	if err != nil {
+		fmt.Println(string(data))
+		return
+	}
+
+	fmt.Print(out)
+}
+
+func printToonPagination(pagination json.RawMessage) {
+	if pagination == nil {
+		return
+	}
+
+	var v interface{}
+	if err := json.Unmarshal(pagination, &v); err != nil {
+		return
+	}
+
+	out, err := gotoon.Encode(v)
+	if err != nil {
+		return
+	}
+
+	fmt.Print(out)
 }
 
 // --- Helpers ---

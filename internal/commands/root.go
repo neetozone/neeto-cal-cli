@@ -21,14 +21,17 @@ var rootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		jsonFlag, _ := cmd.Flags().GetBool("json")
 		quietFlag, _ := cmd.Flags().GetBool("quiet")
+		toonFlag, _ := cmd.Flags().GetBool("toon")
 		output.ForceJSON = jsonFlag
 		output.QuietMode = quietFlag
+		output.ToonMode = toonFlag
 	},
 }
 
 func init() {
 	rootCmd.PersistentFlags().Bool("json", false, "Output as JSON")
 	rootCmd.PersistentFlags().Bool("quiet", false, "Output raw data only (no envelope)")
+	rootCmd.PersistentFlags().Bool("toon", false, "Output in TOON format (token-optimized for AI agents)")
 	rootCmd.PersistentFlags().String("subdomain", "", "Override saved subdomain")
 }
 

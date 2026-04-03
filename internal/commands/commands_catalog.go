@@ -54,7 +54,7 @@ func buildCatalog(cmd *cobra.Command) []catalogEntry {
 		}
 
 		sub.Flags().VisitAll(func(f *pflag.Flag) {
-			if f.Hidden || f.Name == "help" || f.Name == "json" || f.Name == "quiet" || f.Name == "subdomain" {
+			if f.Hidden || f.Name == "help" || f.Name == "json" || f.Name == "quiet" || f.Name == "toon" || f.Name == "subdomain" {
 				return
 			}
 
