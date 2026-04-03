@@ -1,9 +1,12 @@
 package output
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
+	"strings"
 
 	"golang.org/x/term"
 )
@@ -22,6 +25,21 @@ type Envelope struct {
 var (
 	ForceJSON bool
 	QuietMode bool
+)
+
+// priorityFields controls which columns appear in tables and their order.
+var priorityFields = []string{
+	"sid", "name", "title", "email", "status", "kind", "type",
+	"slug", "duration", "spot", "disabled", "default",
+	"host_name", "host_email", "starts_at", "ends_at", "time_zone",
+	"event", "amount", "currency", "wday", "start_time", "end_time",
+	"date", "day",
+}
+
+const (
+	maxTableColumns = 7
+	minColWidth     = 6
+	colPadding      = 3
 )
 
 func IsTTY() bool {
@@ -44,6 +62,7 @@ func Print(data json.RawMessage, breadcrumbs []Breadcrumb) {
 	}
 
 	printPretty(data)
+	printBreadcrumbs(breadcrumbs)
 }
 
 func PrintWithPagination(data json.RawMessage, pagination json.RawMessage, breadcrumbs []Breadcrumb) {
@@ -59,6 +78,7 @@ func PrintWithPagination(data json.RawMessage, pagination json.RawMessage, bread
 
 	printPretty(data)
 	printPaginationSummary(pagination)
+	printBreadcrumbs(breadcrumbs)
 }
 
 func PrintMessage(msg string) {
@@ -81,14 +101,339 @@ func printEnvelope(data json.RawMessage, breadcrumbs []Breadcrumb, pagination js
 	fmt.Println(string(out))
 }
 
+// --- Pretty printing (TTY) ---
+
 func printPretty(data json.RawMessage) {
-	var out []byte
-	out, err := json.MarshalIndent(json.RawMessage(data), "", "  ")
-	if err != nil {
-		fmt.Println(string(data))
+	// Try as array of objects → table
+	var arr []map[string]interface{}
+	if err := json.Unmarshal(data, &arr); err == nil {
+		if len(arr) == 0 {
+			fmt.Println("No records found.")
+			return
+		}
+		printTable(arr)
 		return
 	}
+
+	// Try as object → key-value display
+	var obj map[string]interface{}
+	if err := json.Unmarshal(data, &obj); err == nil {
+		// Unwrap single-key wrappers like {"meeting": {...}}
+		if len(obj) == 1 {
+			for _, v := range obj {
+				if inner, ok := v.(map[string]interface{}); ok {
+					printKeyValue(inner, data)
+					return
+				}
+			}
+		}
+		printKeyValue(obj, data)
+		return
+	}
+
+	// Fallback to indented JSON
+	out, _ := json.MarshalIndent(data, "", "  ")
 	fmt.Println(string(out))
+}
+
+// --- Table output (for arrays) ---
+
+func printTable(rows []map[string]interface{}) {
+	cols := pickColumns(rows[0])
+	if len(cols) == 0 {
+		out, _ := json.MarshalIndent(rows, "", "  ")
+		fmt.Println(string(out))
+		return
+	}
+
+	headers := make([]string, len(cols))
+	for i, col := range cols {
+		headers[i] = formatHeader(col)
+	}
+
+	grid := make([][]string, len(rows))
+	for i, row := range rows {
+		grid[i] = make([]string, len(cols))
+		for j, col := range cols {
+			grid[i][j] = formatValue(row[col])
+		}
+	}
+
+	widths := calculateWidths(headers, grid)
+	pad := strings.Repeat(" ", colPadding)
+
+	// Header
+	for i, h := range headers {
+		if i > 0 {
+			fmt.Print(pad)
+		}
+		fmt.Printf("%-*s", widths[i], truncate(h, widths[i]))
+	}
+	fmt.Println()
+
+	// Separator
+	for i, w := range widths {
+		if i > 0 {
+			fmt.Print(pad)
+		}
+		fmt.Print(strings.Repeat("─", w))
+	}
+	fmt.Println()
+
+	// Rows
+	for _, row := range grid {
+		for i, val := range row {
+			if i > 0 {
+				fmt.Print(pad)
+			}
+			fmt.Printf("%-*s", widths[i], truncate(val, widths[i]))
+		}
+		fmt.Println()
+	}
+}
+
+func pickColumns(sample map[string]interface{}) []string {
+	scalars := map[string]bool{}
+	for k, v := range sample {
+		if isScalar(v) {
+			scalars[k] = true
+		}
+	}
+
+	var cols []string
+	used := map[string]bool{}
+
+	// Priority fields first
+	for _, f := range priorityFields {
+		if scalars[f] && !used[f] && len(cols) < maxTableColumns {
+			cols = append(cols, f)
+			used[f] = true
+		}
+	}
+
+	// Fill remaining with other scalars sorted alphabetically
+	var remaining []string
+	for k := range scalars {
+		if !used[k] {
+			remaining = append(remaining, k)
+		}
+	}
+	sort.Strings(remaining)
+	for _, k := range remaining {
+		if len(cols) >= maxTableColumns {
+			break
+		}
+		cols = append(cols, k)
+	}
+
+	return cols
+}
+
+func calculateWidths(headers []string, grid [][]string) []int {
+	widths := make([]int, len(headers))
+	for i, h := range headers {
+		widths[i] = len(h)
+	}
+	for _, row := range grid {
+		for i, val := range row {
+			if len(val) > widths[i] {
+				widths[i] = len(val)
+			}
+		}
+	}
+
+	termWidth := getTerminalWidth()
+	totalPad := (len(headers) - 1) * colPadding
+	available := termWidth - totalPad
+
+	total := 0
+	for _, w := range widths {
+		total += w
+	}
+
+	if total > available {
+		for i := range widths {
+			widths[i] = max(minColWidth, widths[i]*available/total)
+		}
+	}
+
+	return widths
+}
+
+// --- Key-value output (for single objects) ---
+
+func printKeyValue(obj map[string]interface{}, rawData json.RawMessage) {
+	fields := fieldOrder(rawData)
+	if len(fields) == 0 {
+		for k := range obj {
+			fields = append(fields, k)
+		}
+		sort.Strings(fields)
+	}
+
+	maxLabelLen := 0
+	for _, k := range fields {
+		if _, ok := obj[k]; !ok {
+			continue
+		}
+		label := formatHeader(k)
+		if len(label) > maxLabelLen {
+			maxLabelLen = len(label)
+		}
+	}
+
+	for _, k := range fields {
+		v, ok := obj[k]
+		if !ok {
+			continue
+		}
+		label := formatHeader(k)
+
+		if isScalar(v) {
+			fmt.Printf("  %-*s  %s\n", maxLabelLen, label, formatValue(v))
+		} else {
+			compact, _ := json.Marshal(v)
+			if len(compact) <= 80 {
+				fmt.Printf("  %-*s  %s\n", maxLabelLen, label, string(compact))
+			} else {
+				fmt.Printf("  %-*s  (%s)\n", maxLabelLen, label, describeValue(v))
+			}
+		}
+	}
+}
+
+// fieldOrder extracts key order from a JSON object. For wrapped objects
+// like {"meeting": {...}}, it returns the inner object's field order.
+func fieldOrder(data json.RawMessage) []string {
+	dec := json.NewDecoder(bytes.NewReader(data))
+	t, err := dec.Token()
+	if err != nil || t != json.Delim('{') {
+		return nil
+	}
+
+	var outerKeys []string
+	var firstValue json.RawMessage
+
+	for dec.More() {
+		t, err := dec.Token()
+		if err != nil {
+			break
+		}
+		key, ok := t.(string)
+		if !ok {
+			break
+		}
+		outerKeys = append(outerKeys, key)
+
+		var val json.RawMessage
+		if err := dec.Decode(&val); err != nil {
+			break
+		}
+		if firstValue == nil {
+			firstValue = val
+		}
+	}
+
+	// If single-key wrapper, extract inner field order
+	if len(outerKeys) == 1 && firstValue != nil {
+		if inner := extractKeys(firstValue); len(inner) > 0 {
+			return inner
+		}
+	}
+
+	return outerKeys
+}
+
+func extractKeys(data json.RawMessage) []string {
+	dec := json.NewDecoder(bytes.NewReader(data))
+	t, err := dec.Token()
+	if err != nil || t != json.Delim('{') {
+		return nil
+	}
+
+	var keys []string
+	for dec.More() {
+		t, err := dec.Token()
+		if err != nil {
+			break
+		}
+		key, ok := t.(string)
+		if !ok {
+			break
+		}
+		keys = append(keys, key)
+
+		var val json.RawMessage
+		if err := dec.Decode(&val); err != nil {
+			break
+		}
+	}
+	return keys
+}
+
+// --- Helpers ---
+
+func isScalar(v interface{}) bool {
+	switch v.(type) {
+	case nil, string, float64, bool, json.Number:
+		return true
+	}
+	return false
+}
+
+func formatHeader(field string) string {
+	return strings.ToUpper(strings.ReplaceAll(field, "_", " "))
+}
+
+func formatValue(v interface{}) string {
+	if v == nil {
+		return "-"
+	}
+	switch val := v.(type) {
+	case bool:
+		if val {
+			return "Yes"
+		}
+		return "No"
+	case float64:
+		if val == float64(int64(val)) {
+			return fmt.Sprintf("%d", int64(val))
+		}
+		return fmt.Sprintf("%.2f", val)
+	case string:
+		return val
+	default:
+		return fmt.Sprintf("%v", val)
+	}
+}
+
+func describeValue(v interface{}) string {
+	switch val := v.(type) {
+	case []interface{}:
+		return fmt.Sprintf("%d items", len(val))
+	case map[string]interface{}:
+		return fmt.Sprintf("%d fields", len(val))
+	default:
+		return "..."
+	}
+}
+
+func truncate(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	if maxLen <= 3 {
+		return s[:maxLen]
+	}
+	return s[:maxLen-3] + "..."
+}
+
+func getTerminalWidth() int {
+	w, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil || w <= 0 {
+		return 100
+	}
+	return w
 }
 
 func printPaginationSummary(pagination json.RawMessage) {
@@ -106,4 +451,15 @@ func printPaginationSummary(pagination json.RawMessage) {
 	}
 
 	fmt.Printf("\nPage %d of %d (%d total records)\n", p.CurrentPageNumber, p.TotalPages, p.TotalRecords)
+}
+
+func printBreadcrumbs(breadcrumbs []Breadcrumb) {
+	if len(breadcrumbs) == 0 {
+		return
+	}
+
+	fmt.Println()
+	for _, b := range breadcrumbs {
+		fmt.Printf("  %s: %s\n", b.Label, b.Command)
+	}
 }
