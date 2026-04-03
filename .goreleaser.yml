@@ -28,7 +28,7 @@ archives:
 brews:
   - repository:
       owner: neetozone
-      name: homebrew-neetocal
+      name: homebrew-tap
     homepage: "https://neetocal.com"
     description: "NeetoCal CLI — manage your calendar from the terminal"
     install: |

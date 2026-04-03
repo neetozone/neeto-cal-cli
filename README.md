@@ -9,7 +9,7 @@ Command-line interface for [NeetoCal](https://neetocal.com). Manage meetings, bo
 **Homebrew (recommended):**
 
 ```bash
-brew install neetozone/neetocal/neetocal
+brew install neetozone/tap/neetocal
 ```
 
 To update later:
@@ -172,4 +172,4 @@ brew install goreleaser     # macOS
    goreleaser release --snapshot --clean
    ```
 
-GoReleaser produces archives for Linux, macOS, and Windows (amd64 + arm64). It also publishes to the Homebrew tap at `neetozone/homebrew-neetocal`. Version, commit hash, and build date are injected via ldflags at build time.
+GoReleaser produces archives for Linux, macOS, and Windows (amd64 + arm64). It also publishes to the Homebrew tap at `neetozone/homebrew-tap`. Version, commit hash, and build date are injected via ldflags at build time.
