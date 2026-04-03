@@ -91,10 +91,13 @@ go mod download
 ### Build and run
 
 ```bash
+# Local installation
 make build          # Builds ./neetocal binary
 ./neetocal --help
 
+# Global installation
 make install        # Builds and copies to /usr/local/bin
+neetocal help
 ```
 
 ### Other make targets
