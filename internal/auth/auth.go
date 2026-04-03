@@ -1,0 +1,125 @@
+package auth
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"strings"
+	"time"
+
+	"github.com/pkg/browser"
+)
+
+const (
+	pollInterval = 2 * time.Second
+	pollTimeout  = 120 * time.Second
+)
+
+func BaseURL(subdomain string) string {
+	if override := os.Getenv("NEETOCAL_BASE_URL"); override != "" {
+		return strings.TrimRight(override, "/")
+	}
+	return fmt.Sprintf("https://%s.neetocal.com", subdomain)
+}
+
+func Login(subdomain string) (*Credentials, error) {
+	baseURL := BaseURL(subdomain)
+
+	// Step 1: Create session
+	loginToken, err := createSession(baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("could not create login session: %w", err)
+	}
+
+	// Step 2: Open browser
+	loginURL := fmt.Sprintf("%s/api/cli/v1/login?token=%s", baseURL, loginToken)
+	fmt.Println("Opening browser for login...")
+	fmt.Printf("If the browser doesn't open, visit: %s\n", loginURL)
+
+	if err := browser.OpenURL(loginURL); err != nil {
+		fmt.Printf("Could not open browser: %v\n", err)
+	}
+
+	// Step 3: Poll for authentication
+	fmt.Print("Waiting for authentication")
+	deadline := time.Now().Add(pollTimeout)
+
+	for time.Now().Before(deadline) {
+		time.Sleep(pollInterval)
+		fmt.Print(".")
+
+		status, email, sessionToken, err := checkStatus(baseURL, loginToken)
+		if err != nil {
+			continue
+		}
+
+		switch status {
+		case "authenticated":
+			fmt.Println(" done!")
+			creds := &Credentials{
+				Subdomain:    subdomain,
+				Email:        email,
+				SessionToken: sessionToken,
+			}
+			if err := SaveCredentials(creds); err != nil {
+				return nil, fmt.Errorf("logged in but could not save credentials: %w", err)
+			}
+			return creds, nil
+		case "expired":
+			fmt.Println()
+			return nil, fmt.Errorf("login session expired. Please try again")
+		}
+	}
+
+	fmt.Println()
+	return nil, fmt.Errorf("login timed out after %v. Please try again", pollTimeout)
+}
+
+func createSession(baseURL string) (string, error) {
+	resp, err := http.Post(baseURL+"/api/cli/v1/sessions", "application/json", nil)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unexpected status %d", resp.StatusCode)
+	}
+
+	var result struct {
+		LoginToken string `json:"login_token"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", err
+	}
+
+	return result.LoginToken, nil
+}
+
+func checkStatus(baseURL, loginToken string) (status, email, sessionToken string, err error) {
+	url := fmt.Sprintf("%s/api/cli/v1/sessions/%s/status", baseURL, loginToken)
+	resp, err := http.Post(url, "application/json", bytes.NewReader([]byte("{}")))
+	if err != nil {
+		return "", "", "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	var result struct {
+		Status       string `json:"status"`
+		Email        string `json:"email"`
+		SessionToken string `json:"session_token"`
+	}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return "", "", "", err
+	}
+
+	return result.Status, result.Email, result.SessionToken, nil
+}
