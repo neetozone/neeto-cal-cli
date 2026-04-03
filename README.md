@@ -126,22 +126,26 @@ neetocal login --subdomain spinkart
 
 1. Start neeto-cal-web locally (runs on port 8980 by default).
 
-2. Build and login:
+2. Build and install globally:
    ```bash
-   make build
+   make install    # Builds and copies to /usr/local/bin (may need sudo)
+   ```
+
+3. Login:
+   ```bash
    export NEETOCAL_BASE_URL=http://spinkart.lvh.me:8980
-   ./neetocal login --subdomain spinkart
+   neetocal login --subdomain spinkart
    ```
 
-3. Verify connectivity:
+4. Verify connectivity:
    ```bash
-   ./neetocal doctor
+   neetocal doctor
    ```
 
-4. Test commands:
+5. Test commands:
    ```bash
-   ./neetocal meetings list --json
-   ./neetocal bookings list --type upcoming --json
+   neetocal meetings list
+   neetocal bookings list --type upcoming --json
    ```
 
 ## Release
