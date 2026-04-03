@@ -112,7 +112,7 @@ var bookingsCreateCmd = &cobra.Command{
 			return err
 		}
 
-		printResource(data, nil)
+		printActionResult(data, nil)
 		return nil
 	},
 }
@@ -169,7 +169,7 @@ var bookingsUpdateCmd = &cobra.Command{
 			return err
 		}
 
-		printResource(data, nil)
+		printActionResult(data, nil)
 		return nil
 	},
 }

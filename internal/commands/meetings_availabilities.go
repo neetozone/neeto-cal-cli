@@ -52,7 +52,7 @@ var meetingsAvailabilitiesCreateCmd = &cobra.Command{
 			return err
 		}
 
-		printResource(data, nil)
+		printActionResult(data, nil)
 		return nil
 	},
 }
@@ -83,7 +83,7 @@ var meetingsAvailabilitiesUpdateCmd = &cobra.Command{
 			return err
 		}
 
-		printResource(data, nil)
+		printActionResult(data, nil)
 		return nil
 	},
 }

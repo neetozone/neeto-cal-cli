@@ -95,6 +95,11 @@ func PrintWithPagination(data json.RawMessage, pagination json.RawMessage, bread
 }
 
 func PrintMessage(msg string) {
+	if QuietMode {
+		fmt.Println("success")
+		return
+	}
+
 	if ToonMode {
 		fmt.Println(msg)
 		return
@@ -107,6 +112,52 @@ func PrintMessage(msg string) {
 	} else {
 		fmt.Println(msg)
 	}
+}
+
+// PrintQuiet prints a minimal one-line summary of a resource suitable for
+// action commands (create/update) where the full response body is not needed.
+// In quiet mode it prints only the sid (or id, or name) so the caller gets
+// just the identifier. In other modes it falls through to Print.
+func PrintQuiet(data json.RawMessage, breadcrumbs []Breadcrumb) {
+	if QuietMode {
+		if id := extractIdentifier(data); id != "" {
+			fmt.Println(id)
+			return
+		}
+	}
+
+	Print(data, breadcrumbs)
+}
+
+// extractIdentifier pulls the most useful short identifier from a JSON
+// response. It checks sid first, then id, then name — unwrapping single-key
+// wrappers like {"meeting": {...}} automatically.
+func extractIdentifier(data json.RawMessage) string {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return ""
+	}
+
+	// Unwrap single-key wrappers like {"meeting": {...}}
+	if len(raw) == 1 {
+		for _, v := range raw {
+			var inner map[string]json.RawMessage
+			if json.Unmarshal(v, &inner) == nil {
+				raw = inner
+			}
+		}
+	}
+
+	for _, key := range []string{"sid", "id", "name"} {
+		if v, ok := raw[key]; ok {
+			var s string
+			if json.Unmarshal(v, &s) == nil {
+				return s
+			}
+		}
+	}
+
+	return ""
 }
 
 func printEnvelope(data json.RawMessage, breadcrumbs []Breadcrumb, pagination json.RawMessage) {

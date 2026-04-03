@@ -21,7 +21,7 @@ var meetingsOneOffLinkCmd = &cobra.Command{
 			return err
 		}
 
-		printResource(data, nil)
+		printActionResult(data, nil)
 		return nil
 	},
 }
