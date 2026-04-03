@@ -1,0 +1,11 @@
+{
+  "name": "neetocal",
+  "description": "NeetoCal integration for Claude Code. Manage meetings, bookings, and scheduling.",
+  "author": {
+    "name": "BigBinary",
+    "email": "support@bigbinary.com"
+  },
+  "homepage": "https://github.com/neetozone/neeto-cal-cli",
+  "repository": "https://github.com/neetozone/neeto-cal-cli",
+  "license": "MIT"
+}
