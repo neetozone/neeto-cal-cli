@@ -21,7 +21,7 @@ brew upgrade neetocal
 **Shell script:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/neetozone/neeto-cal-cli/main/install.sh | sh
+curl -fsSL https://neetocal.com/cli/install.sh | sh
 ```
 
 This downloads the latest release, extracts it, and installs to `/usr/local/bin` (may prompt for sudo).
@@ -31,7 +31,7 @@ This downloads the latest release, extracts it, and installs to `/usr/local/bin`
 **Shell script:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/neetozone/neeto-cal-cli/main/install.sh | sh
+curl -fsSL https://neetocal.com/cli/install.sh | sh
 ```
 
 This downloads the latest release for your architecture (amd64 or arm64), extracts it, and installs to `/usr/local/bin` (may prompt for sudo).
@@ -41,13 +41,13 @@ This downloads the latest release for your architecture (amd64 or arm64), extrac
 **PowerShell (recommended):**
 
 ```powershell
-irm https://raw.githubusercontent.com/neetozone/neeto-cal-cli/main/install.ps1 | iex
+irm https://neetocal.com/cli/install.ps1 | iex
 ```
 
 **Command Prompt (CMD):**
 
 ```cmd
-curl -fsSL https://raw.githubusercontent.com/neetozone/neeto-cal-cli/main/install.cmd -o install.cmd && install.cmd
+curl -fsSL https://neetocal.com/cli/install.cmd -o install.cmd && install.cmd
 ```
 
 Both methods download the latest release, extract it to `%LOCALAPPDATA%\Programs\neetocal`, and add it to your user PATH.
