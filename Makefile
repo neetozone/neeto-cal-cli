@@ -6,7 +6,7 @@ LDFLAGS=-ldflags "-s -w -X github.com/neetozone/neeto-cal-cli/internal/commands.
 
 .PHONY: build test lint install clean fmt vet setup
 
-build:
+build: setup
 	go build $(LDFLAGS) -o $(BINARY_NAME) ./cmd/neetocal/
 
 test:
