@@ -1,0 +1,45 @@
+version: 2
+
+builds:
+  - main: ./cmd/neetocal/
+    binary: neetocal
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/bigbinary/neeto-cal-cli/internal/commands.Version={{.Version}}
+      - -X github.com/bigbinary/neeto-cal-cli/internal/commands.Commit={{.ShortCommit}}
+      - -X github.com/bigbinary/neeto-cal-cli/internal/commands.Date={{.Date}}
+
+archives:
+  - formats: ['tar.gz']
+    format_overrides:
+      - goos: windows
+        formats: ['zip']
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+brews:
+  - repository:
+      owner: bigbinary
+      name: homebrew-tap
+    homepage: "https://neetocal.com"
+    description: "NeetoCal CLI — manage your calendar from the terminal"
+    install: |
+      bin.install "neetocal"
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
