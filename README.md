@@ -9,7 +9,7 @@ Command-line interface for [NeetoCal](https://neetocal.com). Manage meetings, bo
 **Homebrew (recommended):**
 
 ```bash
-brew install neetozone/neetocal
+brew install neetozone/neetocal/neetocal
 ```
 
 To update later:
