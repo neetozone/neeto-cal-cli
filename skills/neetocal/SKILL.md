@@ -20,33 +20,33 @@ neetocal whoami                   # Show current user
 neetocal doctor                   # Health check
 
 # Meetings
-neetocal meetings list --json
-neetocal meetings show <sid> --json
+neetocal meetings list --toon
+neetocal meetings show <sid> --toon
 neetocal meetings create --name "Demo" --slug demo --hosts "alice@co.com" --kind one_on_one --spot zoom --duration 30
 neetocal meetings delete <sid>
 
 # Bookings
-neetocal bookings list --type upcoming --json
-neetocal bookings show <id> --json
+neetocal bookings list --type upcoming --toon
+neetocal bookings show <id> --toon
 neetocal bookings create --meeting-slug demo --name "John" --email john@example.com --slot-date 2025-01-15 --slot-start-time 10:00 --time-zone "America/New_York"
 neetocal bookings update <id> --status cancelled --cancel-reason "Rescheduling"
 
 # Available Slots
-neetocal meetings slots <meeting-sid> --year 2025 --month 1 --time-zone "America/New_York" --json
+neetocal meetings slots <meeting-sid> --year 2025 --month 1 --time-zone "America/New_York" --toon
 
 # Availabilities
-neetocal availabilities list --json
+neetocal availabilities list --toon
 neetocal availabilities create --email alice@co.com --name "Work Hours" --time-zone "America/New_York" --json-file periods.json
 
 # Meeting Templates
-neetocal meeting-templates list --json
+neetocal meeting-templates list --toon
 
 # Packages
-neetocal packages list --json
-neetocal packages purchases list <package-id> --json
+neetocal packages list --toon
+neetocal packages purchases list <package-id> --toon
 
 # Automation Rules
-neetocal automation-rules list --json
+neetocal automation-rules list --toon
 neetocal automation-rules create --event booking_confirmed --json-file rule.json
 
 # Discount Codes
@@ -60,16 +60,16 @@ neetocal commands --json          # Full command catalog
 
 ### Check upcoming schedule
 ```bash
-neetocal bookings list --type upcoming --json
+neetocal bookings list --type upcoming --toon
 ```
 
 ### Book a meeting
 ```bash
 # 1. Find available meetings
-neetocal meetings list --json
+neetocal meetings list --toon
 
 # 2. Check available slots
-neetocal meetings slots <meeting-sid> --year 2025 --month 6 --day 15 --time-zone "America/New_York" --json
+neetocal meetings slots <meeting-sid> --year 2025 --month 6 --day 15 --time-zone "America/New_York" --toon
 
 # 3. Create the booking
 neetocal bookings create \
@@ -91,9 +91,19 @@ neetocal bookings update <id> --status cancelled --cancel-reason "No longer need
 neetocal meetings one-off-link <meeting-sid>
 ```
 
+## Token Efficiency
+
+- Use `--toon` for all commands. TOON format uses 30-60% fewer tokens than JSON while preserving all fields.
+
+```bash
+neetocal meetings list --toon
+neetocal bookings list --type upcoming --toon
+neetocal meetings slots <sid> --year 2025 --month 6 --toon
+neetocal meetings show <sid> --toon
+```
+
 ## Important Notes
 
-- Always use `--json` flag for structured output when parsing programmatically
 - Dates are in `YYYY-MM-DD` format
 - Times are in `HH:MM` format (24-hour)
 - Use `neetocal commands --json` to discover all available commands and flags
