@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+# Ensure Go toolchain is in PATH (mise, homebrew, etc.)
+export PATH="$HOME/.local/share/mise/shims:$HOME/go/bin:/usr/local/go/bin:/opt/homebrew/bin:$PATH"
+
+echo "Running fmt..."
+make fmt
+
+# Check if fmt produced any changes
+if ! git diff --quiet; then
+    echo "Error: 'make fmt' modified files. Stage the changes and try again."
+    exit 1
+fi
+
+echo "Running vet..."
+make vet
+
+echo "Running lint..."
+make lint
+
+echo "All checks passed."

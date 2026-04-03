@@ -86,6 +86,7 @@ neetocal --help
 git clone https://github.com/neetozone/neeto-cal-cli.git
 cd neeto-cal-cli
 go mod download
+make setup          # Configures git hooks for fmt, vet, and lint on commit
 ```
 
 ### Build and run
@@ -108,6 +109,7 @@ make lint           # Run golangci-lint
 make fmt            # Format code
 make vet            # Run go vet (catches bugs the compiler misses, like bad format strings or unreachable code)
 make check          # fmt + vet + test
+make setup          # Configure git hooks (run once after clone)
 make clean          # Remove built binary
 ```
 
