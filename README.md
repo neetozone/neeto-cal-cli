@@ -85,8 +85,10 @@ neetocal --help
 ```bash
 git clone https://github.com/neetozone/neeto-cal-cli.git
 cd neeto-cal-cli
-go mod download
+bin/setup
 ```
+
+This installs Go dependencies, golangci-lint, configures git hooks, and builds the binary.
 
 ### Build and run
 
