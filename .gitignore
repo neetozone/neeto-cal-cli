@@ -1,0 +1,4 @@
+/neetocal
+*.exe
+dist/
+.DS_Store
