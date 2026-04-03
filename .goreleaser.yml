@@ -14,9 +14,9 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X github.com/bigbinary/neeto-cal-cli/internal/commands.Version={{.Version}}
-      - -X github.com/bigbinary/neeto-cal-cli/internal/commands.Commit={{.ShortCommit}}
-      - -X github.com/bigbinary/neeto-cal-cli/internal/commands.Date={{.Date}}
+      - -X github.com/neetozone/neeto-cal-cli/internal/commands.Version={{.Version}}
+      - -X github.com/neetozone/neeto-cal-cli/internal/commands.Commit={{.ShortCommit}}
+      - -X github.com/neetozone/neeto-cal-cli/internal/commands.Date={{.Date}}
 
 archives:
   - formats: ['tar.gz']
@@ -27,8 +27,8 @@ archives:
 
 brews:
   - repository:
-      owner: bigbinary
-      name: homebrew-tap
+      owner: neetozone
+      name: homebrew-neetocal
     homepage: "https://neetocal.com"
     description: "NeetoCal CLI — manage your calendar from the terminal"
     install: |

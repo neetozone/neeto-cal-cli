@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set GITHUB_OWNER=bigbinary
+set GITHUB_OWNER=neetozone
 set GITHUB_REPO=neeto-cal-cli
 set BINARY_NAME=neetocal
 set INSTALL_DIR=%LOCALAPPDATA%\Programs\neetocal

@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-GITHUB_OWNER="bigbinary"
+GITHUB_OWNER="neetozone"
 GITHUB_REPO="neeto-cal-cli"
 BINARY_NAME="neetocal"
 INSTALL_DIR="/usr/local/bin"

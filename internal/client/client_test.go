@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/bigbinary/neeto-cal-cli/internal/auth"
+	"github.com/neetozone/neeto-cal-cli/internal/auth"
 )
 
 func newTestClient(server *httptest.Server) *Client {

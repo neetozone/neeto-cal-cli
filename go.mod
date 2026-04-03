@@ -1,4 +1,4 @@
-module github.com/bigbinary/neeto-cal-cli
+module github.com/neetozone/neeto-cal-cli
 
 go 1.26.1
 

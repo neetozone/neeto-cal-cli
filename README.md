@@ -9,7 +9,7 @@ Command-line interface for [NeetoCal](https://neetocal.com). Manage meetings, bo
 **Homebrew (recommended):**
 
 ```bash
-brew install bigbinary/tap/neetocal
+brew install neetozone/neetocal/neetocal
 ```
 
 To update later:
@@ -21,7 +21,7 @@ brew upgrade neetocal
 **Shell script:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/bigbinary/neeto-cal-cli/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/neetozone/neeto-cal-cli/main/install.sh | sh
 ```
 
 This downloads the latest release, extracts it, and installs to `/usr/local/bin` (may prompt for sudo).
@@ -31,7 +31,7 @@ This downloads the latest release, extracts it, and installs to `/usr/local/bin`
 **Shell script:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/bigbinary/neeto-cal-cli/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/neetozone/neeto-cal-cli/main/install.sh | sh
 ```
 
 This downloads the latest release for your architecture (amd64 or arm64), extracts it, and installs to `/usr/local/bin` (may prompt for sudo).
@@ -41,20 +41,20 @@ This downloads the latest release for your architecture (amd64 or arm64), extrac
 **PowerShell (recommended):**
 
 ```powershell
-irm https://raw.githubusercontent.com/bigbinary/neeto-cal-cli/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/neetozone/neeto-cal-cli/main/install.ps1 | iex
 ```
 
 **Command Prompt (CMD):**
 
 ```cmd
-curl -fsSL https://raw.githubusercontent.com/bigbinary/neeto-cal-cli/main/install.cmd -o install.cmd && install.cmd
+curl -fsSL https://raw.githubusercontent.com/neetozone/neeto-cal-cli/main/install.cmd -o install.cmd && install.cmd
 ```
 
 Both methods download the latest release, extract it to `%LOCALAPPDATA%\Programs\neetocal`, and add it to your user PATH.
 
 ### Manual download
 
-Download the latest release archive for your platform from the [Releases](https://github.com/bigbinary/neeto-cal-cli/releases/latest) page, extract it, and place the `neetocal` binary somewhere on your PATH.
+Download the latest release archive for your platform from the [Releases](https://github.com/neetozone/neeto-cal-cli/releases/latest) page, extract it, and place the `neetocal` binary somewhere on your PATH.
 
 | Platform       | Archive                                    |
 |----------------|--------------------------------------------|
@@ -83,7 +83,7 @@ neetocal --help
 ### Setup
 
 ```bash
-git clone https://github.com/bigbinary/neeto-cal-cli.git
+git clone https://github.com/neetozone/neeto-cal-cli.git
 cd neeto-cal-cli
 go mod download
 ```
@@ -172,4 +172,4 @@ brew install goreleaser     # macOS
    goreleaser release --snapshot --clean
    ```
 
-GoReleaser produces archives for Linux, macOS, and Windows (amd64 + arm64). It also publishes to the Homebrew tap at `bigbinary/homebrew-tap`. Version, commit hash, and build date are injected via ldflags at build time.
+GoReleaser produces archives for Linux, macOS, and Windows (amd64 + arm64). It also publishes to the Homebrew tap at `neetozone/homebrew-neetocal`. Version, commit hash, and build date are injected via ldflags at build time.

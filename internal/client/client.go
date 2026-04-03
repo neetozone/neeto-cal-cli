@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/bigbinary/neeto-cal-cli/internal/auth"
+	"github.com/neetozone/neeto-cal-cli/internal/auth"
 )
 
 var version = "dev"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bigbinary/neeto-cal-cli/internal/output"
+	"github.com/neetozone/neeto-cal-cli/internal/output"
 	"github.com/spf13/cobra"
 )
 

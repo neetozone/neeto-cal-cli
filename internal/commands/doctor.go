@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bigbinary/neeto-cal-cli/internal/auth"
+	"github.com/neetozone/neeto-cal-cli/internal/auth"
 	"github.com/spf13/cobra"
 )
 

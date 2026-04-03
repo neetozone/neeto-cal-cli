@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$GithubOwner = "bigbinary"
+$GithubOwner = "neetozone"
 $GithubRepo = "neeto-cal-cli"
 $BinaryName = "neetocal"
 $InstallDir = "$env:LOCALAPPDATA\Programs\neetocal"

@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bigbinary/neeto-cal-cli/internal/auth"
-	"github.com/bigbinary/neeto-cal-cli/internal/output"
+	"github.com/neetozone/neeto-cal-cli/internal/auth"
+	"github.com/neetozone/neeto-cal-cli/internal/output"
 	"github.com/spf13/cobra"
 )
 
