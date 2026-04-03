@@ -1,0 +1,64 @@
+package commands
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/url"
+	"os"
+
+	"github.com/bigbinary/neeto-cal-cli/internal/client"
+	"github.com/bigbinary/neeto-cal-cli/internal/output"
+	"github.com/spf13/cobra"
+)
+
+func getClient() (*client.Client, error) {
+	return client.NewFromCredentials()
+}
+
+func printList(data json.RawMessage, resourceKey string, breadcrumbs []output.Breadcrumb) {
+	var parsed map[string]json.RawMessage
+	if err := json.Unmarshal(data, &parsed); err != nil {
+		output.Print(data, breadcrumbs)
+		return
+	}
+
+	items, hasItems := parsed[resourceKey]
+	pagination := parsed["pagination"]
+
+	if hasItems && pagination != nil {
+		output.PrintWithPagination(items, pagination, breadcrumbs)
+	} else if hasItems {
+		output.Print(items, breadcrumbs)
+	} else {
+		output.Print(data, breadcrumbs)
+	}
+}
+
+func printResource(data json.RawMessage, breadcrumbs []output.Breadcrumb) {
+	output.Print(data, breadcrumbs)
+}
+
+func paginationParams(cmd *cobra.Command) url.Values {
+	params := url.Values{}
+	page, _ := cmd.Flags().GetInt("page")
+	pageSize, _ := cmd.Flags().GetInt("page-size")
+	client.AddPaginationParams(params, page, pageSize)
+	return params
+}
+
+func addPaginationFlags(cmd *cobra.Command) {
+	cmd.Flags().Int("page", 0, "Page number")
+	cmd.Flags().Int("page-size", 0, "Items per page (max 100)")
+}
+
+func readJSONFile(path string) (map[string]interface{}, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("could not read file %s: %w", path, err)
+	}
+	var result map[string]interface{}
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil, fmt.Errorf("invalid JSON in %s: %w", path, err)
+	}
+	return result, nil
+}
