@@ -123,7 +123,7 @@ export NEETOCAL_BASE_URL=http://spinkart.lvh.me:8980
 neetocal login --subdomain spinkart
 
 # Staging
-export NEETOCAL_BASE_URL=https://spinkart.neetocal-staging.neetohq.com
+export NEETOCAL_BASE_URL=https://spinkart.neetocal.net
 neetocal login --subdomain spinkart
 ```
 
