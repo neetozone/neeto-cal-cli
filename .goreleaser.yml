@@ -26,9 +26,12 @@ archives:
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
 brews:
-  - repository:
+  - name: neetocal
+    repository:
       owner: neetozone
       name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
     url_template: "https://neeto-downloads.s3.amazonaws.com/cli/NeetoCal/v{{ .Version }}/{{ .ArtifactName }}"
     homepage: "https://neetocal.com"
     description: "NeetoCal CLI — manage your calendar from the terminal"

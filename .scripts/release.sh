@@ -55,6 +55,8 @@ fi
 
 export GORELEASER_CURRENT_TAG="v${VERSION}"
 
+export TAP_GITHUB_TOKEN="${TAP_GITHUB_TOKEN:-$GITHUB_TOKEN}"
+
 echo "Running tests..."
 go test ./...
 echo "Tests passed."
