@@ -47,11 +47,18 @@ release() {
     echo "Tag v${VERSION} already exists. Skipping tag creation."
   else
     git tag -a "v${VERSION}" -m "Release v${VERSION}"
+    echo "Tag v${VERSION} created."
     git push origin "v${VERSION}"
+    echo "Tag v${VERSION} pushed."
   fi
 
   export GORELEASER_CURRENT_TAG="v${VERSION}"
+  echo "Running tests..."
   go test ./...
+  echo "Tests passed."
+  echo "GoReleaser version:"
+  goreleaser --version || true
+  echo "Running goreleaser release..."
   goreleaser release --clean
 
   aws s3 cp dist/ "s3://neeto-downloads/cli/NeetoCal/v${VERSION}/" --recursive --exclude "*" --include "*.tar.gz" --include "*.zip" --include "checksums.txt"
