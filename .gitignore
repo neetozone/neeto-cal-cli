@@ -2,6 +2,6 @@
 *.exe
 dist/
 .DS_Store
-install.sh
-install.ps1
-install.cmd
+/install.sh
+/install.ps1
+/install.cmd
