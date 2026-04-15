@@ -10,11 +10,10 @@ install_gh() {
 }
 
 detect_version_label() {
-  LATEST_COMMIT_SHA=$(git log -1 --pretty=format:"%H")
-  echo "Latest commit SHA: $LATEST_COMMIT_SHA"
-
-  PR_NUMBER=$(gh pr list --state merged --search "$LATEST_COMMIT_SHA" --json number --jq ".[0].number")
+  PR_NUMBER=$(gh pr list --state merged --base main --limit 1 --json number --jq ".[0].number")
   echo "Last merged PR number: $PR_NUMBER"
+
+  [[ -z "$PR_NUMBER" ]] && echo "No merged PR found." && exit 0
 
   PR_LABELS=$(gh pr view $PR_NUMBER --json labels --jq ".labels[].name" | tr "\n" " " | cut -d " " -f 1-)
   echo "PR labels: $PR_LABELS"
