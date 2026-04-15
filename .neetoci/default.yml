@@ -9,9 +9,7 @@ machine_type: multi
 commands:
   - checkout
   - neetoci-version go 1.26
-  - cache restore
   - go mod download
-  - cache store
   - gofmt -l . | tee /tmp/fmt_output && test ! -s /tmp/fmt_output
   - go vet ./...
   - go test ./...
