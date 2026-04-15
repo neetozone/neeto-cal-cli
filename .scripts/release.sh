@@ -44,8 +44,12 @@ release() {
   git config user.email "bot@neeto.com"
   git config core.hooksPath /dev/null
 
-  git tag -a "v${VERSION}" -m "Release v${VERSION}"
-  git push origin "v${VERSION}"
+  if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+    echo "Tag v${VERSION} already exists. Skipping tag creation."
+  else
+    git tag -a "v${VERSION}" -m "Release v${VERSION}"
+    git push origin "v${VERSION}"
+  fi
 
   export GORELEASER_CURRENT_TAG="v${VERSION}"
   go test ./...
