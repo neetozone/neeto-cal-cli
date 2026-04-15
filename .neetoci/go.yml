@@ -5,11 +5,8 @@ triggers:
   branch_name: main
 - event: pull_request
 commands:
-- neetoci-version go 1.11
-- export GO111MODULE=on
-- export GOPATH=~/go
-- export PATH=/home/semaphore/go/bin:$PATH
+- neetoci-version go 1.26
 - checkout
-- go get ./...
+- go mod download
+- go build ./...
 - go test ./...
-- go build -v .
