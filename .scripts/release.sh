@@ -107,5 +107,5 @@ git checkout -b bump-version
 git add VERSION
 git commit -m "Bump version to $NEW_VERSION"
 git push --set-upstream origin bump-version
-gh pr create -B main -H bump-version -t "Bump version to $NEW_VERSION" -b "" -l instant-mergepr
+gh pr create -B main -H bump-version -t "Bump version to $NEW_VERSION" -b "instant-mergepr _t"
 echo "Version bump PR created."
