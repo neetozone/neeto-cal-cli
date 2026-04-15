@@ -5,8 +5,8 @@ triggers:
   branch_name: main
 - event: pull_request
 commands:
-- neetoci-version go 1.26
 - checkout
+- neetoci-version go 1.26
 - go mod download
 - go build ./...
 - go test ./...
