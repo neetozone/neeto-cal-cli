@@ -36,6 +36,9 @@ brews:
       bin.install "neetocal"
 
 
+release:
+  name_template: "v{{ .Version }}"
+
 checksum:
   name_template: "checksums.txt"
 
