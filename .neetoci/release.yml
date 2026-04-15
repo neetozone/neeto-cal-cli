@@ -8,7 +8,7 @@ machine_type: multi
 
 commands:
   - checkout
-  - neetoci-version go 1.26.1
+  - neetoci-version go 1.26
   - export VERSION=$(cat VERSION | tr -d '[:space:]')
   - export COMMIT_MSG=$(git log -1 --pretty=format:"%s")
   - '[ "$COMMIT_MSG" != "Bump version" ] && echo "Not a version bump commit. Skipping release." && exit 0'

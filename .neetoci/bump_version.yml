@@ -8,7 +8,7 @@ machine_type: multi
 
 commands:
   - checkout
-  - neetoci-version go 1.26.1
+  - neetoci-version go 1.26
   - bash ./.scripts/bump_version.sh
 
 triggers:
