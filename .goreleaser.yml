@@ -29,13 +29,15 @@ brews:
   - repository:
       owner: neetozone
       name: homebrew-tap
+    url_template: "https://neeto-downloads.s3.amazonaws.com/cli/NeetoCal/v{{ .Version }}/{{ .ArtifactName }}"
     homepage: "https://neetocal.com"
     description: "NeetoCal CLI — manage your calendar from the terminal"
     install: |
       bin.install "neetocal"
 
+
 release:
-  disable: true
+  name_template: "v{{ .Version }}"
 
 checksum:
   name_template: "checksums.txt"
