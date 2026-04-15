@@ -102,7 +102,10 @@ NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
 echo "$NEW_VERSION" > VERSION
 echo "Bumped version: $VERSION -> $NEW_VERSION"
 
+git push origin --delete bump-version || true
+git checkout -b bump-version
 git add VERSION
 git commit -m "Bump version to $NEW_VERSION"
-git push origin main
-echo "Version bump pushed to main."
+git push --set-upstream origin bump-version
+gh pr create -B main -H bump-version -t "Bump version to $NEW_VERSION" -b "" -l instant-mergepr
+echo "Version bump PR created."
