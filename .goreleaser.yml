@@ -35,8 +35,6 @@ brews:
     install: |
       bin.install "neetocal"
 
-release:
-  disable: true
 
 checksum:
   name_template: "checksums.txt"
