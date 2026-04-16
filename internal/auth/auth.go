@@ -85,6 +85,10 @@ func createSession(baseURL string) (string, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusNotFound {
+		return "", fmt.Errorf("subdomain not found. Please check that you entered the correct subdomain.\nFor example, if your NeetoCal URL is spinkart.neetocal.com then enter 'spinkart'.\nSimilarly, if your NeetoCal URL is acme.neetocal.com then enter 'acme'.")
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("unexpected status %d", resp.StatusCode)
 	}
