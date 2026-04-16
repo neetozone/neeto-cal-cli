@@ -71,7 +71,21 @@ echo "GoReleaser release complete."
 echo "Uploading to S3 versioned directory..."
 aws s3 cp dist/ "s3://neeto-downloads/cli/NeetoCal/v${VERSION}/" --recursive --exclude "*" --include "*.tar.gz" --include "*.zip" --include "checksums.txt"
 
+echo "Generating versioned installer scripts..."
+VERSIONED_URL="https://neeto-downloads.s3.amazonaws.com/cli/NeetoCal/v${VERSION}"
+LATEST_URL="https://neeto-downloads.s3.amazonaws.com/cli/NeetoCal/latest"
+mkdir -p dist/installers
+sed "s|${LATEST_URL}|${VERSIONED_URL}|g" installers/install.sh > dist/installers/install.sh
+sed "s|${LATEST_URL}|${VERSIONED_URL}|g" installers/install.ps1 > dist/installers/install.ps1
+sed "s|${LATEST_URL}|${VERSIONED_URL}|g" installers/install.cmd > dist/installers/install.cmd
+
+echo "Uploading versioned installer scripts to S3..."
+aws s3 cp dist/installers/install.sh "s3://neeto-downloads/cli/NeetoCal/v${VERSION}/install.sh" --content-type "text/plain"
+aws s3 cp dist/installers/install.ps1 "s3://neeto-downloads/cli/NeetoCal/v${VERSION}/install.ps1" --content-type "text/plain"
+aws s3 cp dist/installers/install.cmd "s3://neeto-downloads/cli/NeetoCal/v${VERSION}/install.cmd" --content-type "text/plain"
+
 echo "Uploading to S3 latest directory..."
+aws s3 rm s3://neeto-downloads/cli/NeetoCal/latest/ --recursive
 aws s3 cp "dist/neeto-cal-cli_${VERSION}_linux_amd64.tar.gz" s3://neeto-downloads/cli/NeetoCal/latest/neetocal_linux_amd64.tar.gz
 aws s3 cp "dist/neeto-cal-cli_${VERSION}_linux_arm64.tar.gz" s3://neeto-downloads/cli/NeetoCal/latest/neetocal_linux_arm64.tar.gz
 aws s3 cp "dist/neeto-cal-cli_${VERSION}_darwin_amd64.tar.gz" s3://neeto-downloads/cli/NeetoCal/latest/neetocal_macos_amd64.tar.gz

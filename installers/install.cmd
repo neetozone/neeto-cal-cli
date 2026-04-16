@@ -3,7 +3,10 @@ setlocal
 
 set "BASE_URL=https://neeto-downloads.s3.amazonaws.com/cli/NeetoCal/latest"
 set "INSTALL_DIR=%LOCALAPPDATA%\Programs\neetocal"
-set "ARCHIVE=neetocal_windows_amd64.zip"
+
+set "ARCH=amd64"
+if "%PROCESSOR_ARCHITECTURE%"=="ARM64" set "ARCH=arm64"
+set "ARCHIVE=neetocal_windows_%ARCH%.zip"
 
 echo Downloading NeetoCal CLI...
 set "TMPDIR=%TEMP%\neetocal-install"
