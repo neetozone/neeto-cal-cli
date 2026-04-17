@@ -16,7 +16,7 @@ var automationRulesListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all automation rules",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -37,7 +37,7 @@ var automationRulesCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create an automation rule",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ var automationRulesDeleteCmd = &cobra.Command{
 	Short: "Delete an automation rule",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}

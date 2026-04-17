@@ -16,7 +16,7 @@ var availabilitiesListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all availabilities",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -45,7 +45,7 @@ var availabilitiesShowCmd = &cobra.Command{
 	Short: "Show an availability",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -64,7 +64,7 @@ var availabilitiesCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create an availability",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -110,7 +110,7 @@ var availabilitiesUpdateCmd = &cobra.Command{
 	Short: "Update an availability",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}

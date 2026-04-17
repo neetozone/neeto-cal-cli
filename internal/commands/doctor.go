@@ -14,13 +14,13 @@ var doctorCmd = &cobra.Command{
 	Short: "Check CLI health and connectivity",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Check credentials
-		creds, err := auth.LoadCredentials()
+		subdomain, _ := cmd.Flags().GetString("subdomain")
+		creds, err := auth.SelectCredentials(subdomain)
 		if err != nil {
-			fmt.Println("✗ Authentication: not logged in")
-			fmt.Println("  Run 'neetocal login' to authenticate")
+			fmt.Printf("✗ Authentication: %v\n", err)
 			return nil
 		}
-		fmt.Printf("✓ Authentication: logged in as %s\n", creds.Email)
+		fmt.Printf("✓ Authentication: logged in as %s on %s.neetocal.com\n", creds.Email, creds.Subdomain)
 
 		// Check connectivity
 		baseURL := auth.BaseURL(creds.Subdomain)

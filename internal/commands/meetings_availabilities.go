@@ -16,7 +16,7 @@ var meetingsAvailabilitiesCreateCmd = &cobra.Command{
 	Short: "Create availability for a meeting",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -62,7 +62,7 @@ var meetingsAvailabilitiesUpdateCmd = &cobra.Command{
 	Short: "Update availability for a meeting",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}

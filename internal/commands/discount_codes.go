@@ -15,7 +15,7 @@ var discountCodesCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a discount code",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}

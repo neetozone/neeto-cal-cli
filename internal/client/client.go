@@ -32,14 +32,6 @@ func New(creds *auth.Credentials) *Client {
 	}
 }
 
-func NewFromCredentials() (*Client, error) {
-	creds, err := auth.LoadCredentials()
-	if err != nil {
-		return nil, err
-	}
-	return New(creds), nil
-}
-
 func (c *Client) Get(path string, params url.Values) (json.RawMessage, error) {
 	u := c.BaseURL + path
 	if len(params) > 0 {

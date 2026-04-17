@@ -12,7 +12,7 @@ var meetingsSlotsCmd = &cobra.Command{
 	Short: "List available slots for a meeting",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}

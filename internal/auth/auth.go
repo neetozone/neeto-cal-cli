@@ -59,15 +59,20 @@ func Login(subdomain string) (*Credentials, error) {
 		switch status {
 		case "authenticated":
 			fmt.Println(" done!")
-			creds := &Credentials{
+			creds := Credentials{
 				Subdomain:    subdomain,
 				Email:        email,
 				SessionToken: sessionToken,
 			}
-			if err := SaveCredentials(creds); err != nil {
+			store, err := LoadStore()
+			if err != nil {
+				return nil, fmt.Errorf("logged in but could not read credentials: %w", err)
+			}
+			store.Upsert(creds)
+			if err := SaveStore(store); err != nil {
 				return nil, fmt.Errorf("logged in but could not save credentials: %w", err)
 			}
-			return creds, nil
+			return &creds, nil
 		case "expired":
 			fmt.Println()
 			return nil, fmt.Errorf("login session expired. Please try again")

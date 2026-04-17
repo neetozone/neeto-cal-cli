@@ -17,7 +17,7 @@ var meetingTemplatesListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all meeting templates",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -49,7 +49,7 @@ var meetingTemplatesShowCmd = &cobra.Command{
 	Short: "Show a meeting template",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -68,7 +68,7 @@ var meetingTemplatesCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a meeting template",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -129,7 +129,7 @@ var meetingTemplatesUpdateCmd = &cobra.Command{
 	Short: "Update a meeting template",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -170,7 +170,7 @@ var meetingTemplatesDeleteCmd = &cobra.Command{
 	Short: "Delete a meeting template",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
