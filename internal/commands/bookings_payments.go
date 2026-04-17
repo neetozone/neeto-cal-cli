@@ -16,7 +16,7 @@ var bookingsPaymentsCreateCmd = &cobra.Command{
 	Short: "Create a payment for a booking",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -52,7 +52,7 @@ var bookingsPaymentsUpdateCmd = &cobra.Command{
 	Short: "Update a booking payment",
 	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}

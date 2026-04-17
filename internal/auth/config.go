@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -16,6 +17,11 @@ type Credentials struct {
 	Subdomain    string `json:"subdomain"`
 	Email        string `json:"email"`
 	SessionToken string `json:"session_token"`
+}
+
+// Store is the persisted collection of all logged-in subdomains.
+type Store struct {
+	Credentials []Credentials `json:"credentials"`
 }
 
 func configPath() (string, error) {
@@ -34,7 +40,9 @@ func authFilePath() (string, error) {
 	return filepath.Join(dir, authFile), nil
 }
 
-func LoadCredentials() (*Credentials, error) {
+// LoadStore reads auth.json. Returns an empty Store (no error) when the file
+// is absent. Transparently migrates the legacy single-object format.
+func LoadStore() (*Store, error) {
 	path, err := authFilePath()
 	if err != nil {
 		return nil, err
@@ -43,39 +51,56 @@ func LoadCredentials() (*Credentials, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("not logged in. Run 'neetocal login' to authenticate")
+			return &Store{}, nil
 		}
 		return nil, fmt.Errorf("could not read credentials: %w", err)
 	}
 
-	var creds Credentials
-	if err := json.Unmarshal(data, &creds); err != nil {
+	// New format: {"credentials": [...]}.
+	var store Store
+	if err := json.Unmarshal(data, &store); err == nil && store.Credentials != nil {
+		return &store, nil
+	}
+
+	// Legacy format: a single Credentials object at the top level.
+	var legacy Credentials
+	if err := json.Unmarshal(data, &legacy); err != nil {
 		return nil, fmt.Errorf("invalid credentials file: %w", err)
 	}
-
-	if creds.SessionToken == "" {
-		return nil, fmt.Errorf("not logged in. Run 'neetocal login' to authenticate")
+	if legacy.SessionToken == "" {
+		return &Store{}, nil
 	}
-
-	return &creds, nil
+	return &Store{Credentials: []Credentials{legacy}}, nil
 }
 
-func SaveCredentials(creds *Credentials) error {
-	dir, err := configPath()
+// SaveStore writes the store to disk, creating the config directory as needed.
+// If the store holds no credentials the file is removed instead.
+func SaveStore(store *Store) error {
+	path, err := authFilePath()
 	if err != nil {
 		return err
 	}
 
+	if len(store.Credentials) == 0 {
+		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("could not remove credentials: %w", err)
+		}
+		return nil
+	}
+
+	dir, err := configPath()
+	if err != nil {
+		return err
+	}
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("could not create config directory: %w", err)
 	}
 
-	data, err := json.MarshalIndent(creds, "", "  ")
+	data, err := json.MarshalIndent(store, "", "  ")
 	if err != nil {
 		return fmt.Errorf("could not serialize credentials: %w", err)
 	}
 
-	path := filepath.Join(dir, authFile)
 	if err := os.WriteFile(path, data, 0600); err != nil {
 		return fmt.Errorf("could not write credentials: %w", err)
 	}
@@ -83,15 +108,71 @@ func SaveCredentials(creds *Credentials) error {
 	return nil
 }
 
-func ClearCredentials() error {
-	path, err := authFilePath()
+func (s *Store) Find(subdomain string) (*Credentials, bool) {
+	for i := range s.Credentials {
+		if s.Credentials[i].Subdomain == subdomain {
+			return &s.Credentials[i], true
+		}
+	}
+	return nil, false
+}
+
+// Upsert replaces the entry with the same subdomain, else appends a new one.
+func (s *Store) Upsert(creds Credentials) {
+	for i := range s.Credentials {
+		if s.Credentials[i].Subdomain == creds.Subdomain {
+			s.Credentials[i] = creds
+			return
+		}
+	}
+	s.Credentials = append(s.Credentials, creds)
+}
+
+// Remove deletes the entry with the given subdomain. Returns true if an entry
+// was removed.
+func (s *Store) Remove(subdomain string) bool {
+	for i := range s.Credentials {
+		if s.Credentials[i].Subdomain == subdomain {
+			s.Credentials = append(s.Credentials[:i], s.Credentials[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Store) Subdomains() []string {
+	out := make([]string, len(s.Credentials))
+	for i, c := range s.Credentials {
+		out[i] = c.Subdomain
+	}
+	return out
+}
+
+// SelectCredentials loads the store and returns the credentials a command
+// should use, applying these rules:
+//   - subdomain != "": return the matching entry, error if not present.
+//   - subdomain == "" and store has one entry: return it (default).
+//   - subdomain == "" and store is empty: "not logged in" error.
+//   - subdomain == "" and store has many entries: require --subdomain.
+func SelectCredentials(subdomain string) (*Credentials, error) {
+	store, err := LoadStore()
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("could not remove credentials: %w", err)
+	if len(store.Credentials) == 0 {
+		return nil, fmt.Errorf("not logged in. Run 'neetocal login' to authenticate")
 	}
-
-	return nil
+	if subdomain != "" {
+		creds, ok := store.Find(subdomain)
+		if !ok {
+			return nil, fmt.Errorf("not logged in to %q. Logged in subdomains: %s",
+				subdomain, strings.Join(store.Subdomains(), ", "))
+		}
+		return creds, nil
+	}
+	if len(store.Credentials) == 1 {
+		return &store.Credentials[0], nil
+	}
+	return nil, fmt.Errorf("multiple subdomains logged in (%s); specify --subdomain",
+		strings.Join(store.Subdomains(), ", "))
 }

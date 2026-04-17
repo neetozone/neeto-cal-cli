@@ -15,7 +15,7 @@ var packagesListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all packages",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -37,7 +37,7 @@ var packagesShowCmd = &cobra.Command{
 	Short: "Show a package",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}

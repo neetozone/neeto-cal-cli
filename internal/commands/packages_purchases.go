@@ -16,7 +16,7 @@ var packagesPurchasesListCmd = &cobra.Command{
 	Short: "List purchases for a package",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -38,7 +38,7 @@ var packagesPurchasesShowCmd = &cobra.Command{
 	Short: "Show a package purchase",
 	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}

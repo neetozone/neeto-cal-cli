@@ -15,7 +15,7 @@ var bookingsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all bookings",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -62,7 +62,7 @@ var bookingsShowCmd = &cobra.Command{
 	Short: "Show a booking",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -81,7 +81,7 @@ var bookingsCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a booking",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -122,7 +122,7 @@ var bookingsUpdateCmd = &cobra.Command{
 	Short: "Update a booking",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}

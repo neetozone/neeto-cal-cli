@@ -6,13 +6,19 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/neetozone/neeto-cal-cli/internal/auth"
 	"github.com/neetozone/neeto-cal-cli/internal/client"
 	"github.com/neetozone/neeto-cal-cli/internal/output"
 	"github.com/spf13/cobra"
 )
 
-func getClient() (*client.Client, error) {
-	return client.NewFromCredentials()
+func getClient(cmd *cobra.Command) (*client.Client, error) {
+	subdomain, _ := cmd.Flags().GetString("subdomain")
+	creds, err := auth.SelectCredentials(subdomain)
+	if err != nil {
+		return nil, err
+	}
+	return client.New(creds), nil
 }
 
 func printList(data json.RawMessage, resourceKey string, breadcrumbs []output.Breadcrumb) {

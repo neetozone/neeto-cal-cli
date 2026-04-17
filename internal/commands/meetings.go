@@ -17,7 +17,7 @@ var meetingsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all meetings",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -53,7 +53,7 @@ var meetingsShowCmd = &cobra.Command{
 	Short: "Show a meeting",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -77,7 +77,7 @@ var meetingsCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a meeting",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -143,7 +143,7 @@ var meetingsUpdateCmd = &cobra.Command{
 	Short: "Update a meeting",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
@@ -189,7 +189,7 @@ var meetingsDeleteCmd = &cobra.Command{
 	Short: "Delete a meeting",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := getClient()
+		c, err := getClient(cmd)
 		if err != nil {
 			return err
 		}
