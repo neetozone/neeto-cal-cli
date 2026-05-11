@@ -15,9 +15,11 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "neetocal",
-	Short: "NeetoCal CLI — manage your calendar from the terminal",
-	Long:  "A command-line interface for NeetoCal. Manage meetings, bookings, availabilities, and more.",
+	Use:           "neetocal",
+	Short:         "NeetoCal CLI — manage your calendar from the terminal",
+	Long:          "A command-line interface for NeetoCal. Manage meetings, bookings, availabilities, and more.",
+	SilenceUsage:  true,
+	SilenceErrors: true,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		jsonFlag, _ := cmd.Flags().GetBool("json")
 		quietFlag, _ := cmd.Flags().GetBool("quiet")

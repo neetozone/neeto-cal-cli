@@ -27,6 +27,7 @@ archives:
 
 brews:
   - name: neetocal
+    directory: Formula
     repository:
       owner: neetozone
       name: homebrew-tap

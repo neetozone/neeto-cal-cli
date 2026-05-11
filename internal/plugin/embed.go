@@ -11,6 +11,14 @@ import (
 //go:embed skill.md
 var skillContent string
 
+const (
+	// PluginName matches `.claude-plugin/plugin.json#name` and the entry
+	// under `marketplace.json#plugins[].name`.
+	PluginName = "neetocal"
+	// MarketplaceName matches `.claude-plugin/marketplace.json#name`.
+	MarketplaceName = "neetocal"
+)
+
 // SkillBody returns the SKILL.md content with YAML frontmatter stripped.
 func SkillBody() string {
 	content := skillContent
@@ -22,16 +30,24 @@ func SkillBody() string {
 	return content
 }
 
-// ExtractClaudePlugin writes a complete .claude-plugin/ directory to dest,
-// including plugin.json, hooks, commands, and a copy of SKILL.md.
+// ExtractClaudePlugin writes a Claude Code plugin (and a single-plugin
+// marketplace pointing at it) to dest. The layout follows
+// https://code.claude.com/docs/en/plugins-reference:
+//
+//	dest/
+//	├── .claude-plugin/
+//	│   ├── plugin.json
+//	│   └── marketplace.json
+//	├── skills/<name>/SKILL.md
+//	├── commands/<cmd>.md
+//	└── hooks/{hooks.json,*.sh}
 func ExtractClaudePlugin(dest string) error {
 	if err := os.MkdirAll(dest, 0o755); err != nil {
 		return err
 	}
 
-	// plugin.json
 	manifest := map[string]interface{}{
-		"name":        "neetocal",
+		"name":        PluginName,
 		"description": "NeetoCal integration for Claude Code. Manage meetings, bookings, and scheduling.",
 		"author": map[string]string{
 			"name":  "BigBinary",
@@ -42,7 +58,26 @@ func ExtractClaudePlugin(dest string) error {
 		"license":    "MIT",
 	}
 	manifestJSON, _ := json.MarshalIndent(manifest, "", "  ")
-	if err := writeFile(filepath.Join(dest, "plugin.json"), manifestJSON, 0o644); err != nil {
+	if err := writeFile(filepath.Join(dest, ".claude-plugin", "plugin.json"), manifestJSON, 0o644); err != nil {
+		return err
+	}
+
+	marketplace := map[string]interface{}{
+		"name": MarketplaceName,
+		"owner": map[string]string{
+			"name":  "BigBinary",
+			"email": "support@bigbinary.com",
+		},
+		"plugins": []map[string]string{
+			{
+				"name":        PluginName,
+				"source":      "./",
+				"description": "NeetoCal integration for Claude Code. Manage meetings, bookings, and scheduling.",
+			},
+		},
+	}
+	marketplaceJSON, _ := json.MarshalIndent(marketplace, "", "  ")
+	if err := writeFile(filepath.Join(dest, ".claude-plugin", "marketplace.json"), marketplaceJSON, 0o644); err != nil {
 		return err
 	}
 
