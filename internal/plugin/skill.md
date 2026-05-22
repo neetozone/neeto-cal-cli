@@ -145,7 +145,7 @@ Required flags are marked with `*`. All list commands also accept
 | `bookings list` | — | `--host-email`, `--client-email`, `--type` (`upcoming`/`past`/`cancelled`/`incomplete`), `--sorting-key` (`created_at`/`starts_at`), `--sorting-order` (`asc`/`desc`) |
 | `bookings show` | `<id>` | — |
 | `bookings create` | — | `--meeting-slug*`, `--email*`, `--name*`, `--slot-date*` (YYYY-MM-DD), `--slot-start-time*` (HH:MM), `--time-zone*`, `--preferred-meeting-spot` |
-| `bookings update` | `<id>` | `--status` (`cancelled`/`approved`/`rejected`), `--cancel-reason`, `--rejection-reason`, `--slot-date`, `--slot-start-time`, `--time-zone`, `--reschedule-reason`, `--name`, `--email` (rescheduling via `--slot-date`/`--slot-start-time` requires `--name`, `--email`, `--time-zone`) (all partial — only flags the user sets are sent) |
+| `bookings update` | `<id>` | `--status` (`cancelled`/`approved`/`rejected`), `--cancel-reason`, `--rejection-reason`, `--slot-date`, `--slot-start-time`, `--time-zone`, `--reschedule-reason`, `--name`, `--email` (reschedule reuses the existing booking's client details; pass `--name`/`--email` only to override) (all partial — only flags the user sets are sent) |
 | `bookings payments create` | `<booking-id>` | `--payment-provider*`, `--identifier`, `--discount-code` |
 | `bookings payments update` | `<booking-id> <payment-id>` | `--payment-provider*`, `--status*` (`successful`/`rejected`), `--notes` |
 
