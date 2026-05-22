@@ -213,8 +213,8 @@ func init() {
 	_ = bookingsCreateCmd.MarkFlagRequired("time-zone")
 
 	bookingsCmd.AddCommand(bookingsUpdateCmd)
-	bookingsUpdateCmd.Flags().String("name", "", "Client name (required by the backend when rescheduling)")
-	bookingsUpdateCmd.Flags().String("email", "", "Client email (required by the backend when rescheduling)")
+	bookingsUpdateCmd.Flags().String("name", "", "Client name (optional; overrides the existing booking's name when rescheduling)")
+	bookingsUpdateCmd.Flags().String("email", "", "Client email (optional; overrides the existing booking's email when rescheduling)")
 	bookingsUpdateCmd.Flags().String("status", "", "Status (cancelled, approved, rejected)")
 	bookingsUpdateCmd.Flags().String("cancel-reason", "", "Cancellation reason")
 	bookingsUpdateCmd.Flags().String("rejection-reason", "", "Rejection reason")
