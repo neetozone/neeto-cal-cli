@@ -114,7 +114,7 @@ Required flags are marked with `*`. All list commands also accept
 | `meetings list` | — | `--host-email`, `--search` |
 | `meetings show` | `<sid>` | — |
 | `meetings create` | — | `--name`, `--slug`, `--hosts` (csv emails), `--kind` (e.g., `one_on_one`), `--spot` (e.g., `zoom`), `--duration` (minutes, int), `--description`, `--json-file` |
-| `meetings update` | `<sid>` | `--name`, `--slug`, `--description`, `--json-file` (partial) |
+| `meetings update` | `<sid>` | `--name`, `--slug`, `--description`, `--hosts` (csv emails, required by backend), `--kind`, `--spot`, `--duration` (int), `--json-file` (partial) |
 | `meetings delete` | `<sid>` | — |
 | `meetings slots` | `<meeting-sid>` | `--year*` (int), `--month*` (int 1-12), `--day` (int), `--time-zone*` |
 | `meetings one-off-link` | `<meeting-sid>` | — |
@@ -145,7 +145,7 @@ Required flags are marked with `*`. All list commands also accept
 | `bookings list` | — | `--host-email`, `--client-email`, `--type` (`upcoming`/`past`/`cancelled`/`incomplete`), `--sorting-key` (`created_at`/`starts_at`), `--sorting-order` (`asc`/`desc`) |
 | `bookings show` | `<id>` | — |
 | `bookings create` | — | `--meeting-slug*`, `--email*`, `--name*`, `--slot-date*` (YYYY-MM-DD), `--slot-start-time*` (HH:MM), `--time-zone*`, `--preferred-meeting-spot` |
-| `bookings update` | `<id>` | `--status` (`cancelled`/`approved`/`rejected`), `--cancel-reason`, `--rejection-reason`, `--slot-date`, `--slot-start-time`, `--time-zone`, `--reschedule-reason` (all partial — only flags the user sets are sent) |
+| `bookings update` | `<id>` | `--status` (`cancelled`/`approved`/`rejected`), `--cancel-reason`, `--rejection-reason`, `--slot-date`, `--slot-start-time`, `--time-zone`, `--reschedule-reason`, `--name`, `--email` (rescheduling via `--slot-date`/`--slot-start-time` requires `--name`, `--email`, `--time-zone`) (all partial — only flags the user sets are sent) |
 | `bookings payments create` | `<booking-id>` | `--payment-provider*`, `--identifier`, `--discount-code` |
 | `bookings payments update` | `<booking-id> <payment-id>` | `--payment-provider*`, `--status*` (`successful`/`rejected`), `--notes` |
 
@@ -162,7 +162,7 @@ Required flags are marked with `*`. All list commands also accept
 | `availabilities list` | — | `--emails` (csv) |
 | `availabilities show` | `<id>` | — |
 | `availabilities create` | — | `--email`, `--name`, `--time-zone`, `--json-file` (contains `periods` and `overrides` — required for non-trivial cases) |
-| `availabilities update` | `<id>` | `--json-file` (partial) |
+| `availabilities update` | `<id>` | `--name`, `--json-file` (partial) |
 
 `periods` / `overrides` JSON example:
 ```json

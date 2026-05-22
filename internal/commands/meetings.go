@@ -174,6 +174,26 @@ var meetingsUpdateCmd = &cobra.Command{
 			body["description"] = description
 		}
 
+		hosts, _ := cmd.Flags().GetString("hosts")
+		if hosts != "" {
+			body["hosts"] = strings.Split(hosts, ",")
+		}
+
+		kind, _ := cmd.Flags().GetString("kind")
+		if kind != "" {
+			body["kind"] = kind
+		}
+
+		spot, _ := cmd.Flags().GetString("spot")
+		if spot != "" {
+			body["spot"] = spot
+		}
+
+		duration, _ := cmd.Flags().GetInt("duration")
+		if duration > 0 {
+			body["duration"] = duration
+		}
+
 		data, err := c.Put(fmt.Sprintf("/meetings/%s", args[0]), body)
 		if err != nil {
 			return err
@@ -228,6 +248,10 @@ func init() {
 	meetingsUpdateCmd.Flags().String("name", "", "Meeting name")
 	meetingsUpdateCmd.Flags().String("slug", "", "Meeting slug")
 	meetingsUpdateCmd.Flags().String("description", "", "Meeting description")
+	meetingsUpdateCmd.Flags().String("hosts", "", "Comma-separated host emails (required by the backend on update)")
+	meetingsUpdateCmd.Flags().String("kind", "", "Meeting kind")
+	meetingsUpdateCmd.Flags().String("spot", "", "Meeting spot")
+	meetingsUpdateCmd.Flags().Int("duration", 0, "Meeting duration in minutes")
 	meetingsUpdateCmd.Flags().String("json-file", "", "Path to JSON file with meeting data")
 
 	meetingsCmd.AddCommand(meetingsDeleteCmd)

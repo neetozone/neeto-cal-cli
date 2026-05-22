@@ -126,6 +126,11 @@ var availabilitiesUpdateCmd = &cobra.Command{
 			body = fileData
 		}
 
+		name, _ := cmd.Flags().GetString("name")
+		if name != "" {
+			body["name"] = name
+		}
+
 		data, err := c.Put(fmt.Sprintf("/availabilities/%s", args[0]), body)
 		if err != nil {
 			return err
@@ -152,5 +157,6 @@ func init() {
 	availabilitiesCreateCmd.Flags().String("json-file", "", "Path to JSON file with periods/overrides")
 
 	availabilitiesCmd.AddCommand(availabilitiesUpdateCmd)
+	availabilitiesUpdateCmd.Flags().String("name", "", "Availability name")
 	availabilitiesUpdateCmd.Flags().String("json-file", "", "Path to JSON file with update data")
 }
