@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -25,7 +24,7 @@ var availabilitiesListCmd = &cobra.Command{
 
 		emails, _ := cmd.Flags().GetString("emails")
 		if emails != "" {
-			for _, email := range strings.Split(emails, ",") {
+			for _, email := range splitCSV(emails) {
 				params.Add("emails[]", email)
 			}
 		}

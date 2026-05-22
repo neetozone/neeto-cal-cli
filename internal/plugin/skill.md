@@ -114,7 +114,7 @@ Required flags are marked with `*`. All list commands also accept
 | `meetings list` | — | `--host-email`, `--search` |
 | `meetings show` | `<sid>` | — |
 | `meetings create` | — | `--name`, `--slug`, `--hosts` (csv emails), `--kind` (e.g., `one_on_one`), `--spot` (e.g., `zoom`), `--duration` (minutes, int), `--description`, `--json-file` |
-| `meetings update` | `<sid>` | `--name`, `--slug`, `--description`, `--hosts` (csv emails, required by backend), `--kind`, `--spot`, `--duration` (int), `--json-file` (partial) |
+| `meetings update` | `<sid>` | `--name`, `--slug`, `--description`, `--hosts` (csv emails, optional — omit to keep current hosts), `--kind`, `--spot`, `--duration` (int), `--json-file` (partial) |
 | `meetings delete` | `<sid>` | — |
 | `meetings slots` | `<meeting-sid>` | `--year*` (int), `--month*` (int 1-12), `--day` (int), `--time-zone*` |
 | `meetings one-off-link` | `<meeting-sid>` | — |

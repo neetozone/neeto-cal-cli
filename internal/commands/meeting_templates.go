@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/neetozone/neeto-cal-cli/internal/output"
 	"github.com/spf13/cobra"
@@ -96,7 +95,7 @@ var meetingTemplatesCreateCmd = &cobra.Command{
 
 		hosts, _ := cmd.Flags().GetString("hosts")
 		if hosts != "" {
-			body["hosts"] = strings.Split(hosts, ",")
+			body["hosts"] = splitCSV(hosts)
 		}
 
 		kind, _ := cmd.Flags().GetString("kind")

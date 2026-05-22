@@ -5,12 +5,24 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/neetozone/neeto-cal-cli/internal/auth"
 	"github.com/neetozone/neeto-cal-cli/internal/client"
 	"github.com/neetozone/neeto-cal-cli/internal/output"
 	"github.com/spf13/cobra"
 )
+
+func splitCSV(value string) []string {
+	parts := strings.Split(value, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if trimmed := strings.TrimSpace(p); trimmed != "" {
+			out = append(out, trimmed)
+		}
+	}
+	return out
+}
 
 func getClient(cmd *cobra.Command) (*client.Client, error) {
 	subdomain, _ := cmd.Flags().GetString("subdomain")

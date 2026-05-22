@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/neetozone/neeto-cal-cli/internal/output"
 	"github.com/spf13/cobra"
@@ -105,7 +104,7 @@ var meetingsCreateCmd = &cobra.Command{
 
 		hosts, _ := cmd.Flags().GetString("hosts")
 		if hosts != "" {
-			body["hosts"] = strings.Split(hosts, ",")
+			body["hosts"] = splitCSV(hosts)
 		}
 
 		kind, _ := cmd.Flags().GetString("kind")
@@ -176,7 +175,7 @@ var meetingsUpdateCmd = &cobra.Command{
 
 		hosts, _ := cmd.Flags().GetString("hosts")
 		if hosts != "" {
-			body["hosts"] = strings.Split(hosts, ",")
+			body["hosts"] = splitCSV(hosts)
 		}
 
 		kind, _ := cmd.Flags().GetString("kind")
@@ -248,7 +247,7 @@ func init() {
 	meetingsUpdateCmd.Flags().String("name", "", "Meeting name")
 	meetingsUpdateCmd.Flags().String("slug", "", "Meeting slug")
 	meetingsUpdateCmd.Flags().String("description", "", "Meeting description")
-	meetingsUpdateCmd.Flags().String("hosts", "", "Comma-separated host emails (required by the backend on update)")
+	meetingsUpdateCmd.Flags().String("hosts", "", "Comma-separated host emails (optional; omit to keep current hosts)")
 	meetingsUpdateCmd.Flags().String("kind", "", "Meeting kind")
 	meetingsUpdateCmd.Flags().String("spot", "", "Meeting spot")
 	meetingsUpdateCmd.Flags().Int("duration", 0, "Meeting duration in minutes")
