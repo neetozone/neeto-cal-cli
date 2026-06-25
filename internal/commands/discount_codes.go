@@ -56,9 +56,9 @@ func init() {
 
 	discountCodesCmd.AddCommand(discountCodesCreateCmd)
 	discountCodesCreateCmd.Flags().String("code", "", "Discount code")
-	discountCodesCreateCmd.Flags().String("kind", "", "Code kind (percentage, fixed_amount)")
+	discountCodesCreateCmd.Flags().String("kind", "", "Code kind (percentage, fixed)")
 	discountCodesCreateCmd.Flags().Float64("value", 0, "Discount value")
-	discountCodesCreateCmd.Flags().String("meeting-ids", "", "Comma-separated meeting IDs")
+	discountCodesCreateCmd.Flags().String("meeting-ids", "", "Comma-separated meeting SIDs")
 	discountCodesCreateCmd.Flags().String("expires-at", "", "Expiration date")
 	_ = discountCodesCreateCmd.MarkFlagRequired("code")
 	_ = discountCodesCreateCmd.MarkFlagRequired("kind")
