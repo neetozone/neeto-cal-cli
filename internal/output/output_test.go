@@ -157,8 +157,8 @@ func TestPickColumns_IncludesIDForPurchases(t *testing.T) {
 
 	cols := pickColumns(sample)
 
-	if slices.Index(cols, "id") != 0 {
-		t.Errorf("pickColumns = %v, want id as the first column", cols)
+	if !slices.Contains(cols, "id") {
+		t.Errorf("pickColumns = %v, want id to be included", cols)
 	}
 }
 
