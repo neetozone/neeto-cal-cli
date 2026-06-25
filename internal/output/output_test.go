@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -139,6 +140,44 @@ func TestPrintWithPagination_QuietMode(t *testing.T) {
 	trimmed := strings.TrimSpace(out)
 	if trimmed != `[{"id":1}]` {
 		t.Errorf("quiet output = %q, want raw data without pagination", trimmed)
+	}
+}
+
+func TestPickColumns_IncludesIDForPurchases(t *testing.T) {
+	sample := map[string]interface{}{
+		"id":                 "a1b2c3",
+		"name":               "Oliver Smith",
+		"email":              "oliver@example.com",
+		"status":             "confirmed",
+		"duration":           float64(0),
+		"bookings_remaining": float64(5),
+		"created_at":         "2026-06-25T02:34:46.708Z",
+		"duration_remaining": nil,
+	}
+
+	cols := pickColumns(sample)
+
+	if slices.Index(cols, "id") != 0 {
+		t.Errorf("pickColumns = %v, want id as the first column", cols)
+	}
+}
+
+func TestPickColumns_IDFollowsSID(t *testing.T) {
+	sample := map[string]interface{}{
+		"sid":  "short-id",
+		"id":   "a1b2c3",
+		"name": "Oliver Smith",
+	}
+
+	cols := pickColumns(sample)
+
+	sidIdx := slices.Index(cols, "sid")
+	idIdx := slices.Index(cols, "id")
+	if sidIdx == -1 || idIdx == -1 {
+		t.Fatalf("pickColumns = %v, want both sid and id present", cols)
+	}
+	if sidIdx > idIdx {
+		t.Errorf("pickColumns = %v, want sid before id", cols)
 	}
 }
 

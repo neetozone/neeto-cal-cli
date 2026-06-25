@@ -214,7 +214,7 @@ Typical `--json-file` payload:
 | `packages show` | `<id>` | — |
 | `packages purchases list` | `<package-id>` | — |
 | `packages purchases show` | `<package-id> <purchase-id>` | — |
-| `discount-codes create` | — | `--code*`, `--kind*` (`percentage`/`fixed_amount`), `--value*` (float), `--meeting-ids` (csv), `--expires-at` (ISO date) |
+| `discount-codes create` | — | `--code*`, `--kind*` (`percentage`/`fixed`), `--value*` (float), `--meeting-ids` (csv), `--expires-at` (ISO date) |
 
 ### Diagnostics & IDE setup
 
