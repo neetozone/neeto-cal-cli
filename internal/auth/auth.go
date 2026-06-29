@@ -31,12 +31,12 @@ func Login(subdomain string) (*Credentials, error) {
 	// Step 1: Create session
 	loginToken, err := createSession(baseURL)
 	if err != nil {
-		return nil, fmt.Errorf("could not create login session: %w", err)
+		return nil, fmt.Errorf("Could not create authentication session: %w", err)
 	}
 
 	// Step 2: Open browser
 	loginURL := fmt.Sprintf("%s/api/cli/v1/login?token=%s", baseURL, loginToken)
-	fmt.Println("Opening browser for login...")
+	fmt.Println("Opening browser for authentication...")
 	fmt.Printf("If the browser doesn't open, visit: %s\n", loginURL)
 
 	if err := browser.OpenURL(loginURL); err != nil {
@@ -66,21 +66,21 @@ func Login(subdomain string) (*Credentials, error) {
 			}
 			store, err := LoadStore()
 			if err != nil {
-				return nil, fmt.Errorf("logged in but could not read credentials: %w", err)
+				return nil, fmt.Errorf("Authenticated but could not read credentials: %w", err)
 			}
 			store.Upsert(creds)
 			if err := SaveStore(store); err != nil {
-				return nil, fmt.Errorf("logged in but could not save credentials: %w", err)
+				return nil, fmt.Errorf("Authenticated but could not save credentials: %w", err)
 			}
 			return &creds, nil
 		case "expired":
 			fmt.Println()
-			return nil, fmt.Errorf("login session expired. Please try again")
+			return nil, fmt.Errorf("Authentication session expired. Please try again.")
 		}
 	}
 
 	fmt.Println()
-	return nil, fmt.Errorf("login timed out after %v. Please try again", pollTimeout)
+	return nil, fmt.Errorf("NeetoCal CLI authentication timed out after %d minutes. Please try again.", int(pollTimeout/time.Minute))
 }
 
 func createSession(baseURL string) (string, error) {
@@ -91,11 +91,11 @@ func createSession(baseURL string) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return "", fmt.Errorf("subdomain not found. Please check that you entered the correct subdomain.\nFor example, if your NeetoCal URL is spinkart.neetocal.com then enter 'spinkart'.\nSimilarly, if your NeetoCal URL is acme.neetocal.com then enter 'acme'.")
+		return "", fmt.Errorf("Subdomain not found. Please check that you entered the correct subdomain.\nFor example, if your NeetoCal URL is spinkart.neetocal.com then enter 'spinkart'.\nSimilarly, if your NeetoCal URL is acme.neetocal.com then enter 'acme'.")
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unexpected status %d", resp.StatusCode)
+		return "", fmt.Errorf("Unexpected status %d.", resp.StatusCode)
 	}
 
 	var result struct {
