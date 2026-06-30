@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -90,7 +91,7 @@ func createSession(baseURL string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusNotFound {
+	if resp.StatusCode == http.StatusNotFound || redirectedAway(baseURL, resp) {
 		return "", fmt.Errorf("Subdomain not found. Please check that you entered the correct subdomain.\nFor example, if your NeetoCal URL is spinkart.neetocal.com then enter 'spinkart'.\nSimilarly, if your NeetoCal URL is acme.neetocal.com then enter 'acme'.")
 	}
 
@@ -106,6 +107,14 @@ func createSession(baseURL string) (string, error) {
 	}
 
 	return result.LoginToken, nil
+}
+
+func redirectedAway(requestedURL string, resp *http.Response) bool {
+	requested, err := url.Parse(requestedURL)
+	if err != nil || resp.Request == nil {
+		return false
+	}
+	return resp.Request.URL.Host != requested.Host
 }
 
 func checkStatus(baseURL, loginToken string) (status, email, sessionToken string, err error) {
