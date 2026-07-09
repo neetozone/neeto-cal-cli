@@ -12,7 +12,7 @@ import (
 
 var doctorCmd = &cobra.Command{
 	Use:   "doctor",
-	Short: "Check CLI health and connectivity",
+	Short: "Diagnose CLI authentication, connectivity, and workspace access",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		subdomain, _ := cmd.Flags().GetString("subdomain")
 
