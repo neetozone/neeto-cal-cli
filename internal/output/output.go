@@ -31,7 +31,8 @@ var (
 
 // priorityFields controls which columns appear in tables and their order.
 var priorityFields = []string{
-	"sid", "id", "name", "title", "email", "status", "kind", "type",
+	"sid", "id", "name", "title", "email", "first_name", "last_name",
+	"status", "kind", "type", "organization_role",
 	"slug", "duration", "spot", "disabled", "default",
 	"host_name", "host_email", "starts_at", "ends_at", "time_zone",
 	"event", "amount", "currency", "wday", "start_time", "end_time",
