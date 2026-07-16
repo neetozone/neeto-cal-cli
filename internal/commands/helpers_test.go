@@ -75,6 +75,59 @@ func TestAllowJSONFileToSatisfyRequiredFlags_AllKeysInFile(t *testing.T) {
 	}
 }
 
+func TestAllowJSONFileToSatisfyRequiredFlags_EmptyValuesInFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "data.json")
+	if err := os.WriteFile(path, []byte(`{"name":"","time_zone":null}`), 0644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	cmd := newRequiredFlagsTestCmd()
+	cmd.SetArgs([]string{"--json-file", path})
+
+	err := cmd.Execute()
+	if err == nil {
+		t.Fatal("Execute() expected required flag error for empty values")
+	}
+	if !strings.Contains(err.Error(), "name") || !strings.Contains(err.Error(), "time-zone") {
+		t.Errorf("error = %q, want it to mention name and time-zone", err.Error())
+	}
+}
+
+func TestAllowJSONFileToSatisfyRequiredFlags_ChainsExistingPreRunE(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "data.json")
+	if err := os.WriteFile(path, []byte(`{"name":"Work Hours","time_zone":"America/New_York"}`), 0644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	cmd := &cobra.Command{
+		Use:           "create",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		RunE:          func(cmd *cobra.Command, args []string) error { return nil },
+	}
+	cmd.Flags().String("name", "", "Name")
+	cmd.Flags().String("time-zone", "", "Time zone")
+	cmd.Flags().String("json-file", "", "Path to JSON file")
+	markFlagsRequired(cmd, "name", "time-zone")
+
+	existingRan := false
+	cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+		existingRan = true
+		return nil
+	}
+	allowJSONFileToSatisfyRequiredFlags(cmd)
+
+	cmd.SetArgs([]string{"--json-file", path})
+	if err := cmd.Execute(); err != nil {
+		t.Errorf("Execute() error = %v, want nil", err)
+	}
+	if !existingRan {
+		t.Error("existing PreRunE was not chained")
+	}
+}
+
 func TestAllowJSONFileToSatisfyRequiredFlags_MissingKeyInFile(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "data.json")

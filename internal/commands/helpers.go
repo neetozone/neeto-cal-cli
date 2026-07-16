@@ -24,7 +24,13 @@ func markFlagsRequired(cmd *cobra.Command, names ...string) {
 }
 
 func allowJSONFileToSatisfyRequiredFlags(cmd *cobra.Command) {
+	previousPreRunE := cmd.PreRunE
 	cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+		if previousPreRunE != nil {
+			if err := previousPreRunE(cmd, args); err != nil {
+				return err
+			}
+		}
 		jsonFile, _ := cmd.Flags().GetString("json-file")
 		if jsonFile == "" {
 			return nil
@@ -34,11 +40,24 @@ func allowJSONFileToSatisfyRequiredFlags(cmd *cobra.Command) {
 			return err
 		}
 		cmd.Flags().VisitAll(func(flag *pflag.Flag) {
-			if _, ok := fileData[strings.ReplaceAll(flag.Name, "-", "_")]; ok {
+			if jsonValueSatisfiesFlag(fileData[strings.ReplaceAll(flag.Name, "-", "_")]) {
 				delete(flag.Annotations, cobra.BashCompOneRequiredFlag)
 			}
 		})
 		return nil
+	}
+}
+
+func jsonValueSatisfiesFlag(value interface{}) bool {
+	switch v := value.(type) {
+	case nil:
+		return false
+	case string:
+		return v != ""
+	case []interface{}:
+		return len(v) > 0
+	default:
+		return true
 	}
 }
 
