@@ -49,7 +49,5 @@ func init() {
 	meetingsSlotsCmd.Flags().Int("day", 0, "Day of month")
 	meetingsSlotsCmd.Flags().String("time-zone", "", "Time zone (e.g., America/New_York)")
 
-	_ = meetingsSlotsCmd.MarkFlagRequired("year")
-	_ = meetingsSlotsCmd.MarkFlagRequired("month")
-	_ = meetingsSlotsCmd.MarkFlagRequired("time-zone")
+	markFlagsRequired(meetingsSlotsCmd, "year", "month", "time-zone")
 }

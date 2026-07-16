@@ -205,12 +205,7 @@ func init() {
 	bookingsCreateCmd.Flags().String("slot-start-time", "", "Slot start time (HH:MM)")
 	bookingsCreateCmd.Flags().String("time-zone", "", "Time zone")
 	bookingsCreateCmd.Flags().String("preferred-meeting-spot", "", "Preferred meeting spot")
-	_ = bookingsCreateCmd.MarkFlagRequired("meeting-slug")
-	_ = bookingsCreateCmd.MarkFlagRequired("email")
-	_ = bookingsCreateCmd.MarkFlagRequired("name")
-	_ = bookingsCreateCmd.MarkFlagRequired("slot-date")
-	_ = bookingsCreateCmd.MarkFlagRequired("slot-start-time")
-	_ = bookingsCreateCmd.MarkFlagRequired("time-zone")
+	markFlagsRequired(bookingsCreateCmd, "meeting-slug", "email", "name", "slot-date", "slot-start-time", "time-zone")
 
 	bookingsCmd.AddCommand(bookingsUpdateCmd)
 	bookingsUpdateCmd.Flags().String("name", "", "Client name (optional; overrides the existing booking's name when rescheduling)")

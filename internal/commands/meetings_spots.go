@@ -72,17 +72,17 @@ var meetingsSpotsCreateCmd = &cobra.Command{
 
 		phoneNumber, _ := cmd.Flags().GetString("phone-number")
 		if phoneNumber != "" {
-			body["phone_number"] = phoneNumber
+			body["spot_phone_call_number"] = phoneNumber
 		}
 
 		location, _ := cmd.Flags().GetString("location")
 		if location != "" {
-			body["location"] = location
+			body["spot_in_person_location"] = location
 		}
 
 		customText, _ := cmd.Flags().GetString("custom-text")
 		if customText != "" {
-			body["custom_text"] = customText
+			body["spot_custom_text"] = customText
 		}
 
 		data, err := c.Post(fmt.Sprintf("/meetings/%s/spots", args[0]), body)
@@ -119,17 +119,17 @@ var meetingsSpotsUpdateCmd = &cobra.Command{
 
 		if cmd.Flags().Changed("phone-number") {
 			phoneNumber, _ := cmd.Flags().GetString("phone-number")
-			body["phone_number"] = phoneNumber
+			body["spot_phone_call_number"] = phoneNumber
 		}
 
 		if cmd.Flags().Changed("location") {
 			location, _ := cmd.Flags().GetString("location")
-			body["location"] = location
+			body["spot_in_person_location"] = location
 		}
 
 		if cmd.Flags().Changed("custom-text") {
 			customText, _ := cmd.Flags().GetString("custom-text")
-			body["custom_text"] = customText
+			body["spot_custom_text"] = customText
 		}
 
 		data, err := c.Put(fmt.Sprintf("/meetings/%s/spots/%s", args[0], args[1]), body)
@@ -174,7 +174,7 @@ func init() {
 	meetingsSpotsCreateCmd.Flags().String("phone-number", "", "Phone number for phone spots")
 	meetingsSpotsCreateCmd.Flags().String("location", "", "Location for in-person spots")
 	meetingsSpotsCreateCmd.Flags().String("custom-text", "", "Custom text for the spot")
-	_ = meetingsSpotsCreateCmd.MarkFlagRequired("spot")
+	markFlagsRequired(meetingsSpotsCreateCmd, "spot")
 
 	meetingsSpotsCmd.AddCommand(meetingsSpotsUpdateCmd)
 	meetingsSpotsUpdateCmd.Flags().String("spot", "", "Spot type")

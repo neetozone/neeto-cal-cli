@@ -60,7 +60,5 @@ func init() {
 	discountCodesCreateCmd.Flags().Float64("value", 0, "Discount value")
 	discountCodesCreateCmd.Flags().String("meeting-ids", "", "Comma-separated meeting SIDs")
 	discountCodesCreateCmd.Flags().String("expires-at", "", "Expiration date")
-	_ = discountCodesCreateCmd.MarkFlagRequired("code")
-	_ = discountCodesCreateCmd.MarkFlagRequired("kind")
-	_ = discountCodesCreateCmd.MarkFlagRequired("value")
+	markFlagsRequired(discountCodesCreateCmd, "code", "kind", "value")
 }

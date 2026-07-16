@@ -154,6 +154,8 @@ func init() {
 	availabilitiesCreateCmd.Flags().String("name", "", "Availability name")
 	availabilitiesCreateCmd.Flags().String("time-zone", "", "Time zone")
 	availabilitiesCreateCmd.Flags().String("json-file", "", "Path to JSON file with periods/overrides")
+	markFlagsRequired(availabilitiesCreateCmd, "email", "name")
+	allowJSONFileToSatisfyRequiredFlags(availabilitiesCreateCmd)
 
 	availabilitiesCmd.AddCommand(availabilitiesUpdateCmd)
 	availabilitiesUpdateCmd.Flags().String("name", "", "Availability name")

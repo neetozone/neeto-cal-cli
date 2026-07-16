@@ -113,7 +113,7 @@ Required flags are marked with `*`. All list commands also accept
 |---|---|---|
 | `meetings list` | — | `--host-email`, `--search` |
 | `meetings show` | `<sid>` | — |
-| `meetings create` | — | `--name`, `--slug`, `--hosts` (csv emails), `--kind` (e.g., `one_on_one`), `--spot` (e.g., `zoom`), `--duration` (minutes, int), `--description`, `--json-file` |
+| `meetings create` | — | `--name*`, `--slug*`, `--hosts*` (csv emails), `--kind` (e.g., `one_on_one`), `--spot` (e.g., `zoom`), `--duration*` (minutes, int), `--description`, `--json-file` |
 | `meetings update` | `<sid>` | `--name`, `--slug`, `--description`, `--hosts` (csv emails, optional — omit to keep current hosts), `--kind`, `--spot`, `--duration` (int), `--json-file` (partial) |
 | `meetings delete` | `<sid>` | — |
 | `meetings slots` | `<meeting-sid>` | `--year*` (int), `--month*` (int 1-12), `--day` (int), `--time-zone*` |
@@ -161,7 +161,7 @@ Required flags are marked with `*`. All list commands also accept
 |---|---|---|
 | `availabilities list` | — | `--emails` (csv) |
 | `availabilities show` | `<id>` | — |
-| `availabilities create` | — | `--email`, `--name`, `--time-zone`, `--json-file` (contains `periods` and `overrides` — required for non-trivial cases) |
+| `availabilities create` | — | `--email*`, `--name*`, `--time-zone`, `--json-file` (contains `periods` and `overrides` — required for non-trivial cases) |
 | `availabilities update` | `<id>` | `--name`, `--json-file` (partial) |
 
 `periods` / `overrides` JSON example:
@@ -183,7 +183,7 @@ Required flags are marked with `*`. All list commands also accept
 |---|---|---|
 | `meeting-templates list` | — | `--host-email`, `--search` |
 | `meeting-templates show` | `<id>` | — |
-| `meeting-templates create` | — | `--name`, `--slug`, `--hosts` (csv), `--kind`, `--spot`, `--duration` (int), `--json-file` |
+| `meeting-templates create` | — | `--name*`, `--slug*`, `--hosts` (csv), `--kind`, `--spot`, `--duration*` (int), `--json-file` |
 | `meeting-templates update` | `<id>` | `--name`, `--slug`, `--json-file` (partial) |
 | `meeting-templates delete` | `<id>` | — |
 
@@ -192,7 +192,7 @@ Required flags are marked with `*`. All list commands also accept
 | Command | Positional | Flags |
 |---|---|---|
 | `automation-rules list` | — | — |
-| `automation-rules create` | — | `--event*` (e.g., `booking_confirmed`, `booking_cancelled`), `--name`, `--json-file` (contains `meeting_ids` and `actions`) |
+| `automation-rules create` | — | `--event*` (e.g., `booking_confirmed`, `booking_cancelled`), `--name`, `--json-file*` (contains `meeting_ids` and `actions`) |
 | `automation-rules delete` | `<id>` | — |
 
 Typical `--json-file` payload:

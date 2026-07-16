@@ -87,12 +87,11 @@ func init() {
 	bookingsPaymentsCreateCmd.Flags().String("payment-provider", "", "Payment provider")
 	bookingsPaymentsCreateCmd.Flags().String("identifier", "", "Payment identifier")
 	bookingsPaymentsCreateCmd.Flags().String("discount-code", "", "Discount code")
-	_ = bookingsPaymentsCreateCmd.MarkFlagRequired("payment-provider")
+	markFlagsRequired(bookingsPaymentsCreateCmd, "payment-provider")
 
 	bookingsPaymentsCmd.AddCommand(bookingsPaymentsUpdateCmd)
 	bookingsPaymentsUpdateCmd.Flags().String("payment-provider", "", "Payment provider")
 	bookingsPaymentsUpdateCmd.Flags().String("status", "", "Payment status (successful, rejected)")
 	bookingsPaymentsUpdateCmd.Flags().String("notes", "", "Payment notes")
-	_ = bookingsPaymentsUpdateCmd.MarkFlagRequired("payment-provider")
-	_ = bookingsPaymentsUpdateCmd.MarkFlagRequired("status")
+	markFlagsRequired(bookingsPaymentsUpdateCmd, "payment-provider", "status")
 }

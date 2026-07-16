@@ -11,7 +11,55 @@ import (
 	"github.com/neetozone/neeto-cal-cli/internal/client"
 	"github.com/neetozone/neeto-cal-cli/internal/output"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
+
+func markFlagsRequired(cmd *cobra.Command, names ...string) {
+	for _, name := range names {
+		_ = cmd.MarkFlagRequired(name)
+		if flag := cmd.Flags().Lookup(name); flag != nil {
+			flag.Usage += " (required)"
+		}
+	}
+}
+
+func allowJSONFileToSatisfyRequiredFlags(cmd *cobra.Command) {
+	previousPreRunE := cmd.PreRunE
+	cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+		if previousPreRunE != nil {
+			if err := previousPreRunE(cmd, args); err != nil {
+				return err
+			}
+		}
+		jsonFile, _ := cmd.Flags().GetString("json-file")
+		if jsonFile == "" {
+			return nil
+		}
+		fileData, err := readJSONFile(jsonFile)
+		if err != nil {
+			return err
+		}
+		cmd.Flags().VisitAll(func(flag *pflag.Flag) {
+			if jsonValueSatisfiesFlag(fileData[strings.ReplaceAll(flag.Name, "-", "_")]) {
+				delete(flag.Annotations, cobra.BashCompOneRequiredFlag)
+			}
+		})
+		return nil
+	}
+}
+
+func jsonValueSatisfiesFlag(value interface{}) bool {
+	switch v := value.(type) {
+	case nil:
+		return false
+	case string:
+		return v != ""
+	case []interface{}:
+		return len(v) > 0
+	default:
+		return true
+	}
+}
 
 func splitCSV(value string) []string {
 	parts := strings.Split(value, ",")

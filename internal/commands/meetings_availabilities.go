@@ -96,6 +96,8 @@ func init() {
 	meetingsAvailabilitiesCreateCmd.Flags().String("name", "", "Availability name")
 	meetingsAvailabilitiesCreateCmd.Flags().String("time-zone", "", "Time zone")
 	meetingsAvailabilitiesCreateCmd.Flags().String("json-file", "", "Path to JSON file with periods/overrides")
+	markFlagsRequired(meetingsAvailabilitiesCreateCmd, "email", "name")
+	allowJSONFileToSatisfyRequiredFlags(meetingsAvailabilitiesCreateCmd)
 
 	meetingsAvailabilitiesCmd.AddCommand(meetingsAvailabilitiesUpdateCmd)
 	meetingsAvailabilitiesUpdateCmd.Flags().String("json-file", "", "Path to JSON file with update data")

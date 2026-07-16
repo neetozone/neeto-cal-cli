@@ -141,7 +141,7 @@ func init() {
 	meetingsDurationsCmd.AddCommand(meetingsDurationsCreateCmd)
 	meetingsDurationsCreateCmd.Flags().Int("duration", 0, "Duration in minutes")
 	meetingsDurationsCreateCmd.Flags().Bool("is-default", false, "Set as default duration")
-	_ = meetingsDurationsCreateCmd.MarkFlagRequired("duration")
+	markFlagsRequired(meetingsDurationsCreateCmd, "duration")
 
 	meetingsDurationsCmd.AddCommand(meetingsDurationsUpdateCmd)
 	meetingsDurationsUpdateCmd.Flags().Int("duration", 0, "Duration in minutes")
