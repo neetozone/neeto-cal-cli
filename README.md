@@ -1,6 +1,7 @@
 # NeetoCal CLI
 
-Command-line interface for [NeetoCal](https://neetocal.com). Manage meetings, bookings, availabilities, and more from the terminal.
+Command-line interface for [NeetoCal](https://neetocal.com). Manage meetings,
+bookings, availabilities, and more from the terminal.
 
 ## Installation
 
@@ -25,7 +26,8 @@ brew upgrade neetocal
 curl -fsSL https://neetocal.com/cli/install.sh | sh
 ```
 
-This downloads the latest release, extracts it, and installs to `/usr/local/bin` (may prompt for sudo).
+This downloads the latest release, extracts it, and installs to `/usr/local/bin`
+(may prompt for sudo).
 
 ### Linux
 
@@ -35,7 +37,8 @@ This downloads the latest release, extracts it, and installs to `/usr/local/bin`
 curl -fsSL https://neetocal.com/cli/install.sh | sh
 ```
 
-This downloads the latest release for your architecture (amd64 or arm64), extracts it, and installs to `/usr/local/bin` (may prompt for sudo).
+This downloads the latest release for your architecture (amd64 or arm64),
+extracts it, and installs to `/usr/local/bin` (may prompt for sudo).
 
 ### Windows
 
@@ -51,11 +54,14 @@ irm https://neetocal.com/cli/install.ps1 | iex
 curl -fsSL https://neetocal.com/cli/install.cmd -o install.cmd && install.cmd
 ```
 
-Both methods download the latest release, extract it to `%LOCALAPPDATA%\Programs\neetocal`, and add it to your user PATH.
+Both methods download the latest release, extract it to
+`%LOCALAPPDATA%\Programs\neetocal`, and add it to your user PATH.
 
 ### Manual download
 
-Download the latest release archive for your platform from the [Releases](https://github.com/neetozone/neeto-cal-cli/releases/latest) page, extract it, and place the `neetocal` binary somewhere on your PATH.
+Download the latest release archive for your platform from the
+[Releases](https://github.com/neetozone/neeto-cal-cli/releases/latest) page,
+extract it, and place the `neetocal` binary somewhere on your PATH.
 
 | Platform       | Archive                                    |
 |----------------|--------------------------------------------|
@@ -89,7 +95,8 @@ cd neeto-cal-cli
 bin/setup
 ```
 
-This installs Go dependencies, golangci-lint, configures git hooks, and builds the binary.
+This installs Go dependencies, golangci-lint, configures git hooks, and builds
+the binary.
 
 ### Build and run
 
@@ -116,7 +123,8 @@ make clean          # Remove built binary
 
 ### Pointing to a local or staging server
 
-By default the CLI targets `https://{subdomain}.neetocal.com`. Set `NEETOCAL_BASE_URL` to point to a different server:
+By default the CLI targets `https://{subdomain}.neetocal.com`. Set
+`NEETOCAL_BASE_URL` to point to a different server:
 
 ```bash
 # Local development (neeto-cal-web runs on port 8980)
@@ -182,4 +190,6 @@ brew install goreleaser     # macOS
    goreleaser release --snapshot --clean
    ```
 
-GoReleaser produces archives for Linux, macOS, and Windows (amd64 + arm64). It also publishes to the Homebrew tap at `neetozone/homebrew-tap`. Version, commit hash, and build date are injected via ldflags at build time.
+GoReleaser produces archives for Linux, macOS, and Windows (amd64 + arm64). It
+also publishes to the Homebrew tap at `neetozone/homebrew-tap`. Version, commit
+hash, and build date are injected via ldflags at build time.
