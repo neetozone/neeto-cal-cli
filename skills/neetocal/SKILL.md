@@ -192,7 +192,7 @@ Required flags are marked with `*`. All list commands also accept
 | Command | Positional | Flags |
 |---|---|---|
 | `automation-rules list` | — | — |
-| `automation-rules create` | — | `--event*` (e.g., `booking_confirmed`, `booking_cancelled`), `--name`, `--json-file` (contains `meeting_ids` and `actions`) |
+| `automation-rules create` | — | `--event*` (e.g., `booking_confirmed`, `booking_cancelled`), `--name`, `--json-file*` (contains `meeting_ids` and `actions`) |
 | `automation-rules delete` | `<id>` | — |
 
 Typical `--json-file` payload:
