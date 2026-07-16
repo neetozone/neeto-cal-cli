@@ -174,7 +174,7 @@ func init() {
 	meetingsSpotsCreateCmd.Flags().String("phone-number", "", "Phone number for phone spots")
 	meetingsSpotsCreateCmd.Flags().String("location", "", "Location for in-person spots")
 	meetingsSpotsCreateCmd.Flags().String("custom-text", "", "Custom text for the spot")
-	_ = meetingsSpotsCreateCmd.MarkFlagRequired("spot")
+	markFlagsRequired(meetingsSpotsCreateCmd, "spot")
 
 	meetingsSpotsCmd.AddCommand(meetingsSpotsUpdateCmd)
 	meetingsSpotsUpdateCmd.Flags().String("spot", "", "Spot type")

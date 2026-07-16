@@ -103,7 +103,8 @@ func init() {
 	automationRulesCreateCmd.Flags().String("name", "", "Rule name")
 	automationRulesCreateCmd.Flags().String("event", "", "Trigger event")
 	automationRulesCreateCmd.Flags().String("json-file", "", "Path to JSON file with meeting_ids and actions")
-	_ = automationRulesCreateCmd.MarkFlagRequired("event")
+	markFlagsRequired(automationRulesCreateCmd, "event")
+	allowJSONFileToSatisfyRequiredFlags(automationRulesCreateCmd)
 
 	automationRulesCmd.AddCommand(automationRulesDeleteCmd)
 }

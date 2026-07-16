@@ -242,6 +242,8 @@ func init() {
 	meetingsCreateCmd.Flags().Int("duration", 0, "Meeting duration in minutes")
 	meetingsCreateCmd.Flags().String("description", "", "Meeting description")
 	meetingsCreateCmd.Flags().String("json-file", "", "Path to JSON file with meeting data")
+	markFlagsRequired(meetingsCreateCmd, "name", "slug", "hosts", "duration")
+	allowJSONFileToSatisfyRequiredFlags(meetingsCreateCmd)
 
 	meetingsCmd.AddCommand(meetingsUpdateCmd)
 	meetingsUpdateCmd.Flags().String("name", "", "Meeting name")

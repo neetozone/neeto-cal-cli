@@ -225,7 +225,8 @@ func init() {
 	teamMembersCreateCmd.Flags().String("invited-by", "", "Email of an existing workspace admin")
 	teamMembersCreateCmd.Flags().Bool("send-invitation-email", true, "Send an invitation email to the added members")
 	teamMembersCreateCmd.Flags().String("json-file", "", "Path to JSON file with team member data")
-	_ = teamMembersCreateCmd.MarkFlagRequired("emails")
+	markFlagsRequired(teamMembersCreateCmd, "emails")
+	allowJSONFileToSatisfyRequiredFlags(teamMembersCreateCmd)
 
 	teamMembersCmd.AddCommand(teamMembersUpdateCmd)
 	teamMembersUpdateCmd.Flags().String("email", "", "Email")
