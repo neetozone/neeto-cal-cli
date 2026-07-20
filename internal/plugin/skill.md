@@ -222,6 +222,7 @@ Typical `--json-file` payload:
 |---|---|
 | `doctor` | Auth check + API reachability + version. Uses `--subdomain` when multiple are logged in. |
 | `version` | Print CLI version / commit / build date. |
+| `update` | Update the CLI to the latest version (auto-detects brew / shell / PowerShell install). |
 | `commands` | Emit the full command/flag catalog as JSON. |
 | `setup claude` | Install NeetoCal plugin into Claude Code (`plugin.json`, hooks, this SKILL.md). |
 | `setup cursor` / `windsurf` / `copilot` / `gemini` / `codex` | Write IDE-specific NeetoCal rule files. |
