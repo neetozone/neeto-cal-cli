@@ -42,7 +42,9 @@ var priorityFields = []string{
 
 const (
 	maxTableColumns = 7
-	minColWidth     = 6
+	ellipsis        = "..."
+	minContentWidth = 10
+	minColWidth     = minContentWidth + len(ellipsis)
 	colPadding      = 3
 )
 
@@ -359,11 +361,12 @@ func calculateWidths(headers []string, grid [][]string) []int {
 		return widths
 	}
 
-	// URL columns keep their full width; the rest absorb the shortfall.
+	// URL columns keep their full width; the rest absorb the shortfall, but
+	// never shrink past minColWidth nor grow beyond what their content needs.
 	budget := max(0, available-(total-flexible))
 	for i := range widths {
 		if !protected[i] {
-			widths[i] = max(minColWidth, widths[i]*budget/flexible)
+			widths[i] = min(widths[i], max(minColWidth, widths[i]*budget/flexible))
 		}
 	}
 
@@ -607,10 +610,10 @@ func truncate(s string, maxLen int) string {
 		return s
 	}
 	runes := []rune(s)
-	if maxLen <= 3 {
+	if maxLen <= len(ellipsis) {
 		return string(runes[:maxLen])
 	}
-	return string(runes[:maxLen-3]) + "..."
+	return string(runes[:maxLen-len(ellipsis)]) + ellipsis
 }
 
 func getTerminalWidth() int {

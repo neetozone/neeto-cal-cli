@@ -90,3 +90,23 @@ func utf8Valid(s string) bool {
 	}
 	return true
 }
+
+func TestTruncate_KeepsAtLeastMinContentWidth(t *testing.T) {
+	resetModes()
+
+	data := json.RawMessage(`[{"name":"Weekly planning session with the design team","slug":"weekly-planning-session-design","summary":"` + strings.Repeat("y", 300) + `","url":"` + longURL + `"}]`)
+	out := captureStdout(t, func() { printPretty(data) })
+
+	for _, line := range strings.Split(out, "\n") {
+		for _, cell := range strings.Split(line, strings.Repeat(" ", colPadding)) {
+			cell = strings.TrimSpace(cell)
+			if !strings.HasSuffix(cell, ellipsis) {
+				continue
+			}
+			kept := displayWidth(strings.TrimSuffix(cell, ellipsis))
+			if kept < minContentWidth {
+				t.Errorf("cell %q keeps %d characters, want at least %d", cell, kept, minContentWidth)
+			}
+		}
+	}
+}
