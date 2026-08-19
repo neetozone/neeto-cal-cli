@@ -155,7 +155,7 @@ func TestPickColumns_IncludesIDForPurchases(t *testing.T) {
 		"duration_remaining": nil,
 	}
 
-	cols := pickColumns(sample)
+	cols := pickColumns([]map[string]interface{}{sample})
 
 	if !slices.Contains(cols, "id") {
 		t.Errorf("pickColumns = %v, want id to be included", cols)
@@ -169,7 +169,7 @@ func TestPickColumns_IDFollowsSID(t *testing.T) {
 		"name": "Oliver Smith",
 	}
 
-	cols := pickColumns(sample)
+	cols := pickColumns([]map[string]interface{}{sample})
 
 	sidIdx := slices.Index(cols, "sid")
 	idIdx := slices.Index(cols, "id")
