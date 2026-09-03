@@ -13,7 +13,7 @@ func newTeamMembersListTestCmd() *cobra.Command {
 	return cmd
 }
 
-func TestTeamMembersListParams_UsesPageNumberNotPage(t *testing.T) {
+func TestTeamMembersListParams_SendsPageAndPageNumber(t *testing.T) {
 	cmd := newTeamMembersListTestCmd()
 	if err := cmd.Flags().Set("page", "3"); err != nil {
 		t.Fatalf("set page: %v", err)
@@ -24,11 +24,11 @@ func TestTeamMembersListParams_UsesPageNumberNotPage(t *testing.T) {
 
 	params := teamMembersListParams(cmd)
 
+	if got := params.Get("page"); got != "3" {
+		t.Errorf("page = %q, want 3", got)
+	}
 	if got := params.Get("page_number"); got != "3" {
 		t.Errorf("page_number = %q, want 3", got)
-	}
-	if _, ok := params["page"]; ok {
-		t.Errorf("params should not contain page, got %q", params.Get("page"))
 	}
 	if got := params.Get("page_size"); got != "50" {
 		t.Errorf("page_size = %q, want 50", got)

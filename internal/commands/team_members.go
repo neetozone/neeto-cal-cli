@@ -39,17 +39,7 @@ var teamMembersListCmd = &cobra.Command{
 }
 
 func teamMembersListParams(cmd *cobra.Command) url.Values {
-	params := url.Values{}
-
-	page, _ := cmd.Flags().GetInt("page")
-	if page > 0 {
-		params.Set("page_number", fmt.Sprintf("%d", page))
-	}
-
-	pageSize, _ := cmd.Flags().GetInt("page-size")
-	if pageSize > 0 {
-		params.Set("page_size", fmt.Sprintf("%d", pageSize))
-	}
+	params := paginationParams(cmd)
 
 	email, _ := cmd.Flags().GetString("email")
 	if email != "" {
