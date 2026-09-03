@@ -224,7 +224,7 @@ Typical `--json-file` payload:
 | `version` | Print CLI version / commit / build date. |
 | `commands` | Emit the full command/flag catalog as JSON. |
 | `setup claude` | Install NeetoCal plugin into Claude Code (`plugin.json`, hooks, this SKILL.md). |
-| `setup cursor` / `windsurf` / `copilot` / `gemini` / `codex` | Write IDE-specific NeetoCal rule files. |
+| `setup cursor` / `windsurf` / `copilot` / `gemini` / `codex` | Write NeetoCal rule files into the current project directory; re-run after an upgrade to refresh them. |
 
 ## Common workflows
 
