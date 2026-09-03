@@ -2,9 +2,9 @@ package commands
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/neetozone/neeto-cal-cli/internal/plugin"
@@ -14,6 +14,9 @@ import (
 var setupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Set up NeetoCal for AI coding assistants",
+	Long: "Set up NeetoCal for AI coding assistants.\n\n" +
+		"Every subcommand except \"claude\" writes into the current project directory,\n" +
+		"so run it from the root of the project you want the assistant to use NeetoCal in.",
 }
 
 // --- Claude Code ---
@@ -104,12 +107,14 @@ func windsurfContent() string {
 
 // --- Copilot ---
 
+var copilotInstructionsPath = filepath.Join(".github", "copilot-instructions.md")
+
 var setupCopilotCmd = &cobra.Command{
 	Use:   "copilot",
 	Short: "Add NeetoCal instructions for GitHub Copilot",
+	Long:  sectionHelp(copilotInstructionsPath),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		target := filepath.Join(".github", "copilot-instructions.md")
-		return writeAppendMode(target, plugin.SkillBody())
+		return writeSection(cmd.OutOrStdout(), copilotInstructionsPath, plugin.SkillBody())
 	},
 }
 
@@ -118,8 +123,9 @@ var setupCopilotCmd = &cobra.Command{
 var setupGeminiCmd = &cobra.Command{
 	Use:   "gemini",
 	Short: "Add NeetoCal instructions for Gemini CLI",
+	Long:  sectionHelp("GEMINI.md"),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return writeAppendMode("GEMINI.md", plugin.SkillBody())
+		return writeSection(cmd.OutOrStdout(), "GEMINI.md", plugin.SkillBody())
 	},
 }
 
@@ -128,9 +134,19 @@ var setupGeminiCmd = &cobra.Command{
 var setupCodexCmd = &cobra.Command{
 	Use:   "codex",
 	Short: "Add NeetoCal instructions for OpenAI Codex",
+	Long:  sectionHelp("AGENTS.md"),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return writeAppendMode("AGENTS.md", plugin.SkillBody())
+		return writeSection(cmd.OutOrStdout(), "AGENTS.md", plugin.SkillBody())
 	},
+}
+
+func sectionHelp(target string) string {
+	return fmt.Sprintf(
+		"Add a NeetoCal section to %s in the current project directory.\n\n"+
+			"Existing content in the file is kept. Re-running replaces the NeetoCal section\n"+
+			"instead of adding a duplicate, so run it again after every upgrade.",
+		target,
+	)
 }
 
 // --- Helpers ---
@@ -154,60 +170,22 @@ func writeCreateMode(target, content string) error {
 	return nil
 }
 
-// writeAppendMode appends a "## NeetoCal CLI" section to a file, or replaces
-// an existing section. Creates the file if it doesn't exist.
-func writeAppendMode(target, body string) error {
-	section := "## NeetoCal CLI\n\n" + body
+func sectionMarkers() (string, string) {
+	name := rootCmd.Name()
+	return "<!-- " + name + ":start -->", "<!-- " + name + ":end -->"
+}
 
-	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+func writeSection(w io.Writer, target, body string) error {
+	_, statErr := os.Stat(target)
+	start, end := sectionMarkers()
+	if _, err := upsertBlock(target, start, end, "## NeetoCal CLI\n\n"+body); err != nil {
 		return err
 	}
-
-	existing, err := os.ReadFile(target)
-	if err != nil {
-		// File doesn't exist — create with just the section
-		if os.IsNotExist(err) {
-			if err := os.WriteFile(target, []byte(section), 0o644); err != nil {
-				return err
-			}
-			fmt.Printf("Wrote %s\n", target)
-			return nil
-		}
-		return err
+	if statErr == nil {
+		fmt.Fprintf(w, "Updated %s\n", target)
+	} else {
+		fmt.Fprintf(w, "Wrote %s\n", target)
 	}
-
-	content := string(existing)
-
-	// Replace existing NeetoCal section if present
-	re := regexp.MustCompile(`(?m)^## NeetoCal CLI\n[\s\S]*?(?:\n## |\z)`)
-	if re.MatchString(content) {
-		// Find the match to check if it ends with another ## header
-		loc := re.FindStringIndex(content)
-		matched := content[loc[0]:loc[1]]
-		if strings.HasSuffix(matched, "\n## ") {
-			// Preserve the next section header
-			replacement := section + "\n\n## "
-			content = content[:loc[0]] + replacement + content[loc[1]:]
-		} else {
-			content = content[:loc[0]] + section
-		}
-		if err := os.WriteFile(target, []byte(content), 0o644); err != nil {
-			return err
-		}
-		fmt.Printf("Updated %s\n", target)
-		return nil
-	}
-
-	// Append new section
-	if !strings.HasSuffix(content, "\n") {
-		content += "\n"
-	}
-	content += "\n" + section
-
-	if err := os.WriteFile(target, []byte(content), 0o644); err != nil {
-		return err
-	}
-	fmt.Printf("Updated %s\n", target)
 	return nil
 }
 

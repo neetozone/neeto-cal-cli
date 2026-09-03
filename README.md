@@ -74,6 +74,22 @@ After installing, restart your terminal and run:
 neetocal --help
 ```
 
+## AI coding assistants
+
+```bash
+neetocal setup claude      # Register plugin with Claude Code
+neetocal setup cursor      # Write .cursor/rules/neetocal.mdc
+neetocal setup windsurf    # Write .windsurf/rules/neetocal.md
+neetocal setup copilot     # Add a NeetoCal section to .github/copilot-instructions.md
+neetocal setup gemini      # Add a NeetoCal section to GEMINI.md
+neetocal setup codex       # Add a NeetoCal section to AGENTS.md
+```
+
+Every command except `setup claude` writes into the current project directory, so
+run it from the root of the project the assistant works in. Existing content in
+those files is kept. Re-running after an upgrade replaces the NeetoCal section
+instead of adding a duplicate.
+
 ## Prerequisites (development)
 
 - [Go](https://go.dev/dl/) 1.22+
