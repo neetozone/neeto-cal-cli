@@ -540,7 +540,7 @@ func extractKeys(data json.RawMessage) []string {
 func printToon(data json.RawMessage, pagination json.RawMessage) {
 	out, err := encodeToon(data, pagination)
 	if err != nil {
-		printEnvelope(data, nil, pagination)
+		fmt.Println(string(data))
 		return
 	}
 

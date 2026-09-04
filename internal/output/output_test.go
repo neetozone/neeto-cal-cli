@@ -251,3 +251,16 @@ func TestPrintWithPagination_ToonRowsDoNotRunIntoPagination(t *testing.T) {
 		t.Errorf("PrintWithPagination toon = %q, want %q", out, want)
 	}
 }
+
+func TestPrint_ToonFallsBackToRawBodyWhenNotJSON(t *testing.T) {
+	ToonMode = true
+	defer func() { ToonMode = false }()
+
+	out := captureStdout(t, func() {
+		Print(json.RawMessage(`<html>oops</html>`), nil)
+	})
+
+	if out != "<html>oops</html>\n" {
+		t.Errorf("Print toon fallback = %q, want the raw body on its own line", out)
+	}
+}
