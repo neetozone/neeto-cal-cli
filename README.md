@@ -25,7 +25,7 @@ brew upgrade neetocal
 curl -fsSL https://neetocal.com/cli/install.sh | sh
 ```
 
-This downloads the latest release, extracts it, and installs to `/usr/local/bin` (may prompt for sudo).
+This downloads the latest release, verifies its SHA-256 checksum against the published `SHA256SUMS`, extracts it, and installs to `/usr/local/bin` (may prompt for sudo). Set `NEETOCAL_INSTALL_DIR` to a directory you own to install without sudo.
 
 ### Linux
 
@@ -35,7 +35,7 @@ This downloads the latest release, extracts it, and installs to `/usr/local/bin`
 curl -fsSL https://neetocal.com/cli/install.sh | sh
 ```
 
-This downloads the latest release for your architecture (amd64 or arm64), extracts it, and installs to `/usr/local/bin` (may prompt for sudo).
+This downloads the latest release for your architecture (amd64 or arm64), verifies its SHA-256 checksum against the published `SHA256SUMS`, extracts it, and installs to `/usr/local/bin` (may prompt for sudo). Set `NEETOCAL_INSTALL_DIR` to a directory you own to install without sudo.
 
 ### Windows
 
@@ -51,7 +51,7 @@ irm https://neetocal.com/cli/install.ps1 | iex
 curl -fsSL https://neetocal.com/cli/install.cmd -o install.cmd && install.cmd
 ```
 
-Both methods download the latest release, extract it to `%LOCALAPPDATA%\Programs\neetocal`, and add it to your user PATH.
+Both methods download the latest release, verify its SHA-256 checksum against the published `SHA256SUMS`, extract it to `%LOCALAPPDATA%\Programs\neetocal`, and add it to your user PATH. Set `NEETOCAL_INSTALL_DIR` to install somewhere else.
 
 ### Manual download
 
