@@ -13,7 +13,7 @@ var availabilitiesCmd = &cobra.Command{
 
 var availabilitiesListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all availabilities",
+	Short: "List availabilities",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := getClient(cmd)
 		if err != nil {
@@ -141,7 +141,7 @@ var availabilitiesUpdateCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(availabilitiesCmd)
+	register(func(root *cobra.Command) { root.AddCommand(availabilitiesCmd) })
 
 	availabilitiesCmd.AddCommand(availabilitiesListCmd)
 	addPaginationFlags(availabilitiesListCmd)

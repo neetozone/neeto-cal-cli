@@ -13,7 +13,7 @@ func newTeamMembersListTestCmd() *cobra.Command {
 	return cmd
 }
 
-func TestTeamMembersListParams_SendsPageAndPageNumber(t *testing.T) {
+func TestTeamMembersListParams_SendsBothPageSpellings(t *testing.T) {
 	cmd := newTeamMembersListTestCmd()
 	if err := cmd.Flags().Set("page", "3"); err != nil {
 		t.Fatalf("set page: %v", err)
@@ -25,7 +25,7 @@ func TestTeamMembersListParams_SendsPageAndPageNumber(t *testing.T) {
 	params := teamMembersListParams(cmd)
 
 	if got := params.Get("page"); got != "3" {
-		t.Errorf("page = %q, want 3", got)
+		t.Errorf("page = %q, want 3; endpoints that read only 'page' ignore paging without it", got)
 	}
 	if got := params.Get("page_number"); got != "3" {
 		t.Errorf("page_number = %q, want 3", got)

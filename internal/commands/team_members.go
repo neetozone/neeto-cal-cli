@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/neetozone/neeto-cal-cli/internal/output"
+	"github.com/neetozone/neeto-cli-commons/output"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ var teamMembersCmd = &cobra.Command{
 
 var teamMembersListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all team members",
+	Short: "List team members",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := getClient(cmd)
 		if err != nil {
@@ -65,7 +65,7 @@ var teamMembersShowCmd = &cobra.Command{
 		}
 
 		breadcrumbs := []output.Breadcrumb{
-			{Label: "List all team members", Command: "neetocal team-members list"},
+			{Label: "List team members", Command: "neetocal team-members list"},
 			{Label: "Delete team member", Command: fmt.Sprintf("neetocal team-members delete %s", args[0])},
 		}
 
@@ -195,13 +195,13 @@ var teamMembersDeleteCmd = &cobra.Command{
 			return err
 		}
 
-		output.PrintMessage("Team member removed successfully.")
+		printMessage("Team member removed.")
 		return nil
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(teamMembersCmd)
+	register(func(root *cobra.Command) { root.AddCommand(teamMembersCmd) })
 
 	teamMembersCmd.AddCommand(teamMembersListCmd)
 	addPaginationFlags(teamMembersListCmd)

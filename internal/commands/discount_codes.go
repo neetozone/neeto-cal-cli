@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"strings"
-
 	"github.com/spf13/cobra"
 )
 
@@ -32,8 +30,7 @@ var discountCodesCreateCmd = &cobra.Command{
 
 		meetingIDs, _ := cmd.Flags().GetString("meeting-ids")
 		if meetingIDs != "" {
-			ids := strings.Split(meetingIDs, ",")
-			body["meeting_ids"] = ids
+			body["meeting_ids"] = splitCSV(meetingIDs)
 		}
 
 		expiresAt, _ := cmd.Flags().GetString("expires-at")
@@ -52,7 +49,7 @@ var discountCodesCreateCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(discountCodesCmd)
+	register(func(root *cobra.Command) { root.AddCommand(discountCodesCmd) })
 
 	discountCodesCmd.AddCommand(discountCodesCreateCmd)
 	discountCodesCreateCmd.Flags().String("code", "", "Discount code")

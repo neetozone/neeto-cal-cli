@@ -13,7 +13,7 @@ var packagesCmd = &cobra.Command{
 
 var packagesListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all packages",
+	Short: "List packages",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := getClient(cmd)
 		if err != nil {
@@ -53,7 +53,7 @@ var packagesShowCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(packagesCmd)
+	register(func(root *cobra.Command) { root.AddCommand(packagesCmd) })
 
 	packagesCmd.AddCommand(packagesListCmd)
 	addPaginationFlags(packagesListCmd)
