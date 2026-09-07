@@ -8,4 +8,4 @@ root_examples:
   - neetocal bookings list
   - neetocal availabilities list
 priority_fields: [name, title, email, first_name, last_name, status, kind, type, organization_role, slug, duration, spot, disabled, default, host_name, host_email, starts_at, ends_at, time_zone, event, amount, currency, payment_provider, wday, start_time, end_time, date, day]
-commons_version: v1.0.0
+commons_version: v1.0.1
