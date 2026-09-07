@@ -14,9 +14,9 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X github.com/neetozone/neeto-cal-cli/internal/commands.Version={{.Version}}
-      - -X github.com/neetozone/neeto-cal-cli/internal/commands.Commit={{.ShortCommit}}
-      - -X github.com/neetozone/neeto-cal-cli/internal/commands.Date={{.Date}}
+      - -X main.version={{.Version}}
+      - -X main.commit={{.ShortCommit}}
+      - -X main.date={{.Date}}
 
 archives:
   - format: tar.gz
@@ -24,6 +24,11 @@ archives:
       - goos: windows
         format: zip
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+blobs:
+  - provider: s3
+    bucket: "neeto-downloads"
+    directory: "cli/NeetoCal/v{{ .Version }}"
 
 brews:
   - name: neetocal
@@ -35,10 +40,9 @@ brews:
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
     url_template: "https://downloads.neeto.com/cli/NeetoCal/v{{ .Version }}/{{ .ArtifactName }}"
     homepage: "https://neetocal.com"
-    description: "NeetoCal CLI — manage your calendar from the terminal"
+    description: "NeetoCal CLI — manage meetings, bookings and availabilities from the terminal"
     install: |
       bin.install "neetocal"
-
 
 release:
   name_template: "v{{ .Version }}"

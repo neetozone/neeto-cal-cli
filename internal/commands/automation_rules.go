@@ -3,7 +3,6 @@ package commands
 import (
 	"fmt"
 
-	"github.com/neetozone/neeto-cal-cli/internal/output"
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +13,7 @@ var automationRulesCmd = &cobra.Command{
 
 var automationRulesListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all automation rules",
+	Short: "List automation rules",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := getClient(cmd)
 		if err != nil {
@@ -88,13 +87,13 @@ var automationRulesDeleteCmd = &cobra.Command{
 			return err
 		}
 
-		output.PrintMessage("Automation rule deleted successfully.")
+		printMessage("Automation rule deleted.")
 		return nil
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(automationRulesCmd)
+	register(func(root *cobra.Command) { root.AddCommand(automationRulesCmd) })
 
 	automationRulesCmd.AddCommand(automationRulesListCmd)
 	addPaginationFlags(automationRulesListCmd)

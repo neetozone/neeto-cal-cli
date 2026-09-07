@@ -1,57 +1,46 @@
 # NeetoCal CLI
 
-Command-line interface for [NeetoCal](https://neetocal.com). Manage meetings, bookings, availabilities, and more from the terminal.
+Manage meetings, bookings and availabilities from the terminal.
 
+<!-- neeto-cli-commons:installation:start -->
 ## Installation
 
-### macOS
+### macOS / Linux
 
-**Homebrew (recommended):**
+**Homebrew (recommended on macOS):**
 
 ```bash
-brew trust neetozone/tap
 brew install neetozone/tap/neetocal
 ```
 
-To update later:
-
-```bash
-brew upgrade neetocal
-```
-
 **Shell script:**
 
 ```bash
-curl -fsSL https://neetocal.com/cli/install.sh | sh
+curl -fsSL https://neeto-downloads.s3.amazonaws.com/cli/NeetoCal/latest/install.sh | sh
 ```
 
-This downloads the latest release, verifies its SHA-256 checksum against the published `SHA256SUMS`, extracts it, and installs to `/usr/local/bin` (may prompt for sudo). Set `NEETOCAL_INSTALL_DIR` to a directory you own to install without sudo.
-
-### Linux
-
-**Shell script:**
-
-```bash
-curl -fsSL https://neetocal.com/cli/install.sh | sh
-```
-
-This downloads the latest release for your architecture (amd64 or arm64), verifies its SHA-256 checksum against the published `SHA256SUMS`, extracts it, and installs to `/usr/local/bin` (may prompt for sudo). Set `NEETOCAL_INSTALL_DIR` to a directory you own to install without sudo.
+This verifies the download's SHA-256 checksum against the published `SHA256SUMS`,
+then installs to `/usr/local/bin` (may prompt for sudo). Set `NEETOCAL_INSTALL_DIR`
+to a directory you own to install without sudo.
 
 ### Windows
 
-**PowerShell (recommended):**
+**PowerShell:**
 
 ```powershell
-irm https://neetocal.com/cli/install.ps1 | iex
+irm https://neeto-downloads.s3.amazonaws.com/cli/NeetoCal/latest/install.ps1 | iex
 ```
 
 **Command Prompt (CMD):**
 
 ```cmd
-curl -fsSL https://neetocal.com/cli/install.cmd -o install.cmd && install.cmd
+curl -fsSL https://neeto-downloads.s3.amazonaws.com/cli/NeetoCal/latest/install.cmd -o install.cmd && install.cmd
 ```
 
-Both methods download the latest release, verify its SHA-256 checksum against the published `SHA256SUMS`, extract it to `%LOCALAPPDATA%\Programs\neetocal`, and add it to your user PATH. Set `NEETOCAL_INSTALL_DIR` to install somewhere else.
+Both verify the download's SHA-256 checksum before installing to
+`%LOCALAPPDATA%\Programs\neetocal` and adding it to your user PATH. Set
+`NEETOCAL_INSTALL_DIR` to install somewhere else.
+<!-- neeto-cli-commons:installation:end -->
 
 ### Manual download
 
@@ -66,14 +55,15 @@ Download the latest release archive for your platform from the [Releases](https:
 | Windows (x86_64) | `neeto-cal-cli_*_windows_amd64.zip`     |
 | Windows (ARM)  | `neeto-cal-cli_*_windows_arm64.zip`        |
 
+<!-- neeto-cli-commons:verify-installation:start -->
 ### Verify installation
-
-After installing, restart your terminal and run:
 
 ```bash
 neetocal --help
 ```
+<!-- neeto-cli-commons:verify-installation:end -->
 
+<!-- neeto-cli-commons:ai-coding-assistants:start -->
 ## AI coding assistants
 
 ```bash
@@ -91,11 +81,14 @@ them after every upgrade: `setup cursor` and `setup windsurf` overwrite their ru
 file, while `setup copilot`, `setup gemini` and `setup codex` keep the existing
 content of their file and replace only the NeetoCal section instead of adding a
 duplicate.
+<!-- neeto-cli-commons:ai-coding-assistants:end -->
 
+<!-- neeto-cli-commons:prerequisites:start -->
 ## Prerequisites (development)
 
-- [Go](https://go.dev/dl/) 1.22+
+- [Go](https://go.dev/dl/) 1.26.1+
 - Access to a NeetoCal organization
+<!-- neeto-cli-commons:prerequisites:end -->
 
 ## Development
 
@@ -121,16 +114,20 @@ make install        # Builds and copies to /usr/local/bin
 neetocal help
 ```
 
-### Other make targets
+<!-- neeto-cli-commons:make-targets:start -->
+### Make targets
 
 ```bash
+make build          # Builds ./neetocal
 make test           # Run tests
-make lint           # Run golangci-lint
-make fmt            # Format code
-make vet            # Run go vet (catches bugs the compiler misses, like bad format strings or unreachable code)
+make lint           # golangci-lint
+make fmt            # gofmt -w
+make vet            # go vet
 make check          # fmt + vet + test
+make install        # Installs to /usr/local/bin
 make clean          # Remove built binary
 ```
+<!-- neeto-cli-commons:make-targets:end -->
 
 ### Pointing to a local or staging server
 
@@ -172,32 +169,27 @@ neetocal login --subdomain spinkart
    neetocal bookings list --type upcoming --json
    ```
 
+<!-- neeto-cli-commons:global-flags:start -->
+## Global flags
+
+Every command accepts:
+
+| Flag | Description |
+|---|---|
+| `--subdomain <name>` | Which logged-in subdomain to use (required when multiple are logged in). |
+| `--json` | Force JSON envelope output. |
+| `--quiet` | Emit raw data only. Action commands print just the identifier; `delete` prints `success`. |
+| `--toon` | TOON (Token-Optimized Output Notation) — compact format for LLMs. |
+<!-- neeto-cli-commons:global-flags:end -->
+
+<!-- neeto-cli-commons:release:start -->
 ## Release
 
-Releases are built with [GoReleaser](https://goreleaser.com/).
-
-### Install GoReleaser
-
-```bash
-brew install goreleaser     # macOS
-```
-
-### Create a release
-
-1. Tag the version:
-   ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
-
-2. Build release artifacts:
-   ```bash
-   goreleaser release --clean
-   ```
-
-3. For a local test build (no publish):
-   ```bash
-   goreleaser release --snapshot --clean
-   ```
-
-GoReleaser produces archives for Linux, macOS, and Windows (amd64 + arm64). It also publishes to the Homebrew tap at `neetozone/homebrew-tap`. Version, commit hash, and build date are injected via ldflags at build time.
+Releases are cut by BigBinary's CI pipeline defined in
+`.neetoci/release.yml`. Merging a PR with a `major` / `minor` / `patch`
+label to `main` triggers the shared release script published by
+`neeto-cli-commons`, which bumps and tags VERSION, runs GoReleaser,
+uploads artifacts to `s3://neeto-downloads/cli/NeetoCal/`, updates the
+Homebrew tap (`neetozone/tap`), and pushes the version bump commit
+straight to `main`.
+<!-- neeto-cli-commons:release:end -->

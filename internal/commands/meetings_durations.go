@@ -3,7 +3,6 @@ package commands
 import (
 	"fmt"
 
-	"github.com/neetozone/neeto-cal-cli/internal/output"
 	"github.com/spf13/cobra"
 )
 
@@ -127,7 +126,7 @@ var meetingsDurationsDeleteCmd = &cobra.Command{
 			return err
 		}
 
-		output.PrintMessage("Duration deleted successfully.")
+		printMessage("Duration deleted.")
 		return nil
 	},
 }

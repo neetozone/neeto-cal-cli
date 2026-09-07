@@ -1,0 +1,11 @@
+pretty_name: NeetoCal
+binary_name: neetocal
+short_description: manage meetings, bookings and availabilities from the terminal
+long_description: A command-line interface for NeetoCal. Manage meetings, bookings, availabilities, and more.
+api_base_path: /api/external/v2
+root_examples:
+  - neetocal meetings list
+  - neetocal bookings list
+  - neetocal availabilities list
+priority_fields: [name, title, email, first_name, last_name, status, kind, type, organization_role, slug, duration, spot, disabled, default, host_name, host_email, starts_at, ends_at, time_zone, event, amount, currency, wday, start_time, end_time, date, day]
+commons_version: main

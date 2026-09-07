@@ -1,6 +1,6 @@
 {
   "name": "neetocal",
-  "description": "NeetoCal integration for Claude Code. Manage meetings, bookings, and scheduling.",
+  "description": "manage meetings, bookings and availabilities from the terminal",
   "author": {
     "name": "BigBinary",
     "email": "support@bigbinary.com"

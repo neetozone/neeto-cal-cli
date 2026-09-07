@@ -52,7 +52,7 @@ var discountCodesCreateCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(discountCodesCmd)
+	register(func(root *cobra.Command) { root.AddCommand(discountCodesCmd) })
 
 	discountCodesCmd.AddCommand(discountCodesCreateCmd)
 	discountCodesCreateCmd.Flags().String("code", "", "Discount code")

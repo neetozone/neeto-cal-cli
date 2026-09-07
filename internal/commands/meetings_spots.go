@@ -3,7 +3,6 @@ package commands
 import (
 	"fmt"
 
-	"github.com/neetozone/neeto-cal-cli/internal/output"
 	"github.com/spf13/cobra"
 )
 
@@ -157,7 +156,7 @@ var meetingsSpotsDeleteCmd = &cobra.Command{
 			return err
 		}
 
-		output.PrintMessage("Spot deleted successfully.")
+		printMessage("Spot deleted.")
 		return nil
 	},
 }

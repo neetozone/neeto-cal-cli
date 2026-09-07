@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/neetozone/neeto-cal-cli/internal/output"
+	"github.com/neetozone/neeto-cli-commons/output"
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +14,7 @@ var meetingsCmd = &cobra.Command{
 
 var meetingsListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all meetings",
+	Short: "List meetings",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := getClient(cmd)
 		if err != nil {
@@ -63,7 +63,7 @@ var meetingsShowCmd = &cobra.Command{
 		}
 
 		breadcrumbs := []output.Breadcrumb{
-			{Label: "List all meetings", Command: "neetocal meetings list"},
+			{Label: "List meetings", Command: "neetocal meetings list"},
 			{Label: "Delete meeting", Command: fmt.Sprintf("neetocal meetings delete %s", args[0])},
 		}
 
@@ -218,13 +218,13 @@ var meetingsDeleteCmd = &cobra.Command{
 			return err
 		}
 
-		output.PrintMessage("Meeting deleted successfully.")
+		printMessage("Meeting deleted.")
 		return nil
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(meetingsCmd)
+	register(func(root *cobra.Command) { root.AddCommand(meetingsCmd) })
 
 	meetingsCmd.AddCommand(meetingsListCmd)
 	addPaginationFlags(meetingsListCmd)
