@@ -152,7 +152,7 @@ func init() {
 	availabilitiesCmd.AddCommand(availabilitiesCreateCmd)
 	availabilitiesCreateCmd.Flags().String("email", "", "Email address")
 	availabilitiesCreateCmd.Flags().String("name", "", "Availability name")
-	availabilitiesCreateCmd.Flags().String("time-zone", "", "Time zone")
+	availabilitiesCreateCmd.Flags().String("time-zone", "", timeZoneUsage)
 	availabilitiesCreateCmd.Flags().String("json-file", "", "Path to JSON file with periods/overrides")
 	markFlagsRequired(availabilitiesCreateCmd, "email", "name")
 	allowJSONFileToSatisfyRequiredFlags(availabilitiesCreateCmd)

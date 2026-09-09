@@ -203,7 +203,7 @@ func init() {
 	bookingsCreateCmd.Flags().String("name", "", "Client name")
 	bookingsCreateCmd.Flags().String("slot-date", "", "Slot date (YYYY-MM-DD)")
 	bookingsCreateCmd.Flags().String("slot-start-time", "", "Slot start time (HH:MM)")
-	bookingsCreateCmd.Flags().String("time-zone", "", "Time zone")
+	bookingsCreateCmd.Flags().String("time-zone", "", timeZoneUsage)
 	bookingsCreateCmd.Flags().String("preferred-meeting-spot", "", "Preferred meeting spot")
 	markFlagsRequired(bookingsCreateCmd, "meeting-slug", "email", "name", "slot-date", "slot-start-time", "time-zone")
 
@@ -215,6 +215,6 @@ func init() {
 	bookingsUpdateCmd.Flags().String("rejection-reason", "", "Rejection reason")
 	bookingsUpdateCmd.Flags().String("slot-date", "", "New slot date (YYYY-MM-DD)")
 	bookingsUpdateCmd.Flags().String("slot-start-time", "", "New slot start time (HH:MM)")
-	bookingsUpdateCmd.Flags().String("time-zone", "", "Time zone")
+	bookingsUpdateCmd.Flags().String("time-zone", "", timeZoneUsage)
 	bookingsUpdateCmd.Flags().String("reschedule-reason", "", "Reschedule reason")
 }

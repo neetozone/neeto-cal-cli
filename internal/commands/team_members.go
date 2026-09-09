@@ -222,7 +222,7 @@ func init() {
 	teamMembersUpdateCmd.Flags().String("email", "", "Email")
 	teamMembersUpdateCmd.Flags().String("first-name", "", "First name")
 	teamMembersUpdateCmd.Flags().String("last-name", "", "Last name")
-	teamMembersUpdateCmd.Flags().String("time-zone", "", "Time zone")
+	teamMembersUpdateCmd.Flags().String("time-zone", "", timeZoneUsage)
 	teamMembersUpdateCmd.Flags().String("organization-role", "", "Organization role")
 	teamMembersUpdateCmd.Flags().String("json-file", "", "Path to JSON file with team member data")
 
