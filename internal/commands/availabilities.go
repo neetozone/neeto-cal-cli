@@ -130,6 +130,11 @@ var availabilitiesUpdateCmd = &cobra.Command{
 			body["name"] = name
 		}
 
+		timeZone, _ := cmd.Flags().GetString("time-zone")
+		if timeZone != "" {
+			body["time_zone"] = timeZone
+		}
+
 		data, err := c.Put(fmt.Sprintf("/availabilities/%s", args[0]), body)
 		if err != nil {
 			return err
@@ -159,5 +164,6 @@ func init() {
 
 	availabilitiesCmd.AddCommand(availabilitiesUpdateCmd)
 	availabilitiesUpdateCmd.Flags().String("name", "", "Availability name")
+	availabilitiesUpdateCmd.Flags().String("time-zone", "", timeZoneUsage)
 	availabilitiesUpdateCmd.Flags().String("json-file", "", "Path to JSON file with update data")
 }
