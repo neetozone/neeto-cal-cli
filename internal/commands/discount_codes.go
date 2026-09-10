@@ -103,30 +103,7 @@ var discountCodesCreateCmd = &cobra.Command{
 			body = fileData
 		}
 
-		code, _ := cmd.Flags().GetString("code")
-		if code != "" {
-			body["code"] = code
-		}
-
-		kind, _ := cmd.Flags().GetString("kind")
-		if kind != "" {
-			body["kind"] = kind
-		}
-
-		if cmd.Flags().Changed("value") {
-			value, _ := cmd.Flags().GetInt("value")
-			body["value"] = value
-		}
-
-		meetingIDs, _ := cmd.Flags().GetString("meeting-ids")
-		if meetingIDs != "" {
-			body["meeting_ids"] = splitCSV(meetingIDs)
-		}
-
-		expiresAt, _ := cmd.Flags().GetString("expires-at")
-		if expiresAt != "" {
-			body["expires_at"] = expiresAt
-		}
+		applyDiscountCodeFlags(cmd, body)
 
 		data, err := c.Post("/discount-codes", body)
 		if err != nil {
@@ -175,6 +152,12 @@ func discountCodeUpdateBody(cmd *cobra.Command) (map[string]interface{}, error) 
 		body = fileData
 	}
 
+	applyDiscountCodeFlags(cmd, body)
+
+	return body, nil
+}
+
+func applyDiscountCodeFlags(cmd *cobra.Command, body map[string]interface{}) {
 	for flag, field := range map[string]string{
 		"code":       "code",
 		"kind":       "kind",
@@ -195,8 +178,6 @@ func discountCodeUpdateBody(cmd *cobra.Command) (map[string]interface{}, error) 
 		meetingIDs, _ := cmd.Flags().GetString("meeting-ids")
 		body["meeting_ids"] = splitCSV(meetingIDs)
 	}
-
-	return body, nil
 }
 
 var discountCodesDeleteCmd = &cobra.Command{

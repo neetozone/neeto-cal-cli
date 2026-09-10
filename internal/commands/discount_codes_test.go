@@ -189,3 +189,47 @@ func simplifyFilterQuery(query string) string {
 	}
 	return strings.Join(parts, "&")
 }
+
+func TestDiscountCodeFilterQuery_HandlesOneFilterOnItsOwn(t *testing.T) {
+	cmd := newDiscountCodesListTestCmd()
+	if err := cmd.Flags().Set("kind", "percentage"); err != nil {
+		t.Fatalf("set kind: %v", err)
+	}
+
+	want := strings.Join([]string{
+		"node=kind", "type=text", "rule=is", "value=percentage", "conditions_join_type=and",
+	}, "&")
+	if got := simplifyFilterQuery(discountCodeFilterQuery(cmd)); got != want {
+		t.Errorf("filter query = %q, want %q", got, want)
+	}
+}
+
+func TestDiscountCodeUpdateBody_LetsAnEmptyFlagOverrideTheJSONFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "code.json")
+	if err := os.WriteFile(path, []byte(`{"expires_at":"2026-12-31","value":10}`), 0o644); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+
+	cmd := newDiscountCodesUpdateTestCmd()
+	if err := cmd.Flags().Set("json-file", path); err != nil {
+		t.Fatalf("set json-file: %v", err)
+	}
+	if err := cmd.Flags().Set("expires-at", ""); err != nil {
+		t.Fatalf("set expires-at: %v", err)
+	}
+	if err := cmd.Flags().Set("value", "25"); err != nil {
+		t.Fatalf("set value: %v", err)
+	}
+
+	body, err := discountCodeUpdateBody(cmd)
+	if err != nil {
+		t.Fatalf("build body: %v", err)
+	}
+
+	if body["expires_at"] != "" {
+		t.Errorf("body[expires_at] = %v, want the explicit empty flag to win over the file", body["expires_at"])
+	}
+	if body["value"] != 25 {
+		t.Errorf("body[value] = %v, want the flag to override the file", body["value"])
+	}
+}
