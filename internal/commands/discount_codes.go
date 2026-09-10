@@ -54,8 +54,8 @@ func init() {
 	discountCodesCmd.AddCommand(discountCodesCreateCmd)
 	discountCodesCreateCmd.Flags().String("code", "", "Discount code")
 	discountCodesCreateCmd.Flags().String("kind", "", "Code kind (percentage, fixed)")
-	discountCodesCreateCmd.Flags().Float64("value", 0, "Discount value")
+	discountCodesCreateCmd.Flags().Float64("value", 0, "Discount value: 0-100 when --kind is percentage, otherwise a flat amount in the workspace default currency")
 	discountCodesCreateCmd.Flags().String("meeting-ids", "", "Comma-separated meeting SIDs")
-	discountCodesCreateCmd.Flags().String("expires-at", "", "Expiration date")
+	discountCodesCreateCmd.Flags().String("expires-at", "", "Expiration date (YYYY-MM-DD)")
 	markFlagsRequired(discountCodesCreateCmd, "code", "kind", "value")
 }

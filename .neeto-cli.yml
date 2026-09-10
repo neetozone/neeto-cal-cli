@@ -2,6 +2,7 @@ pretty_name: NeetoCal
 binary_name: neetocal
 short_description: manage meetings, bookings and availabilities from the terminal
 long_description: A command-line interface for NeetoCal. Manage meetings, bookings, availabilities, and more.
+docs_url: https://apidocs.neetocal.com/cli/introduction
 api_base_path: /api/external/v2
 root_examples:
   - neetocal meetings list

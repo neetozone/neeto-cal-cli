@@ -78,6 +78,11 @@ var meetingsAvailabilitiesUpdateCmd = &cobra.Command{
 			body = fileData
 		}
 
+		timeZone, _ := cmd.Flags().GetString("time-zone")
+		if timeZone != "" {
+			body["time_zone"] = timeZone
+		}
+
 		data, err := c.Patch(fmt.Sprintf("/meetings/%s/availabilities", args[0]), body)
 		if err != nil {
 			return err
@@ -94,11 +99,12 @@ func init() {
 	meetingsAvailabilitiesCmd.AddCommand(meetingsAvailabilitiesCreateCmd)
 	meetingsAvailabilitiesCreateCmd.Flags().String("email", "", "Email address")
 	meetingsAvailabilitiesCreateCmd.Flags().String("name", "", "Availability name")
-	meetingsAvailabilitiesCreateCmd.Flags().String("time-zone", "", "Time zone")
+	meetingsAvailabilitiesCreateCmd.Flags().String("time-zone", "", timeZoneUsage)
 	meetingsAvailabilitiesCreateCmd.Flags().String("json-file", "", "Path to JSON file with periods/overrides")
 	markFlagsRequired(meetingsAvailabilitiesCreateCmd, "email", "name")
 	allowJSONFileToSatisfyRequiredFlags(meetingsAvailabilitiesCreateCmd)
 
 	meetingsAvailabilitiesCmd.AddCommand(meetingsAvailabilitiesUpdateCmd)
+	meetingsAvailabilitiesUpdateCmd.Flags().String("time-zone", "", timeZoneUsage)
 	meetingsAvailabilitiesUpdateCmd.Flags().String("json-file", "", "Path to JSON file with update data")
 }
