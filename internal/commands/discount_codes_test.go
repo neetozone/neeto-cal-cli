@@ -1,9 +1,11 @@
 package commands
 
 import (
+	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -109,4 +111,81 @@ func TestDiscountCodeUpdateBody_LetsFlagsOverrideTheJSONFile(t *testing.T) {
 	if body["redeems_limit"] != float64(5) {
 		t.Errorf("body[redeems_limit] = %v, want the file to supply fields that have no flag", body["redeems_limit"])
 	}
+}
+
+func newDiscountCodesListTestCmd() *cobra.Command {
+	cmd := &cobra.Command{Use: "list"}
+	addPaginationFlags(cmd)
+	cmd.Flags().String("code", "", "Filter by codes containing this text")
+	cmd.Flags().String("kind", "", "Filter by code kind (percentage, fixed)")
+	return cmd
+}
+
+func TestDiscountCodeFilterQuery_IsEmptyWithoutFilterFlags(t *testing.T) {
+	if got := discountCodeFilterQuery(newDiscountCodesListTestCmd()); got != "" {
+		t.Errorf("discountCodeFilterQuery() = %q, want empty so the request carries no filters key", got)
+	}
+}
+
+func TestDiscountCodeFilterQuery_KeepsEachConditionsFieldsTogetherInOrder(t *testing.T) {
+	cmd := newDiscountCodesListTestCmd()
+	if err := cmd.Flags().Set("code", "SAVE 20"); err != nil {
+		t.Fatalf("set code: %v", err)
+	}
+	if err := cmd.Flags().Set("kind", "fixed"); err != nil {
+		t.Fatalf("set kind: %v", err)
+	}
+
+	got := discountCodeFilterQuery(cmd)
+
+	want := strings.Join([]string{
+		"node=code", "type=text", "rule=contains", "value=SAVE+20", "conditions_join_type=and",
+		"node=kind", "type=text", "rule=is", "value=fixed", "conditions_join_type=and",
+	}, "&")
+	if simplifyFilterQuery(got) != want {
+		t.Errorf("filter query = %q\nsimplified = %q\nwant       = %q\nRails reads these as an ordered nested query; a duplicate key is what starts the next condition, so order carries meaning",
+			got, simplifyFilterQuery(got), want)
+	}
+}
+
+func TestDiscountCodesListPath_AppendsPaginationAfterTheFilters(t *testing.T) {
+	cmd := newDiscountCodesListTestCmd()
+	if err := cmd.Flags().Set("kind", "percentage"); err != nil {
+		t.Fatalf("set kind: %v", err)
+	}
+	if err := cmd.Flags().Set("page", "2"); err != nil {
+		t.Fatalf("set page: %v", err)
+	}
+
+	path := discountCodesListPath(cmd)
+
+	if !strings.HasPrefix(path, "/discount-codes?"+url.QueryEscape("filters[][conditions][][node]")) {
+		t.Errorf("path = %q, want the ordered filter keys to lead the query", path)
+	}
+	if !strings.Contains(path, "page=2") {
+		t.Errorf("path = %q, want the pagination keys kept", path)
+	}
+}
+
+func TestDiscountCodesListPath_HasNoQueryWithoutFlags(t *testing.T) {
+	if got := discountCodesListPath(newDiscountCodesListTestCmd()); got != "/discount-codes" {
+		t.Errorf("discountCodesListPath() = %q, want a bare path", got)
+	}
+}
+
+func simplifyFilterQuery(query string) string {
+	var parts []string
+	for _, pair := range strings.Split(query, "&") {
+		key, value, found := strings.Cut(pair, "=")
+		if !found {
+			continue
+		}
+		decoded, err := url.QueryUnescape(key)
+		if err != nil {
+			continue
+		}
+		field := strings.TrimSuffix(strings.TrimPrefix(decoded, "filters[][conditions][]["), "]")
+		parts = append(parts, field+"="+value)
+	}
+	return strings.Join(parts, "&")
 }
