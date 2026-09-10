@@ -39,14 +39,30 @@ var discountCodesCreateCmd = &cobra.Command{
 			return err
 		}
 
-		code, _ := cmd.Flags().GetString("code")
-		kind, _ := cmd.Flags().GetString("kind")
-		value, _ := cmd.Flags().GetInt("value")
+		body := map[string]interface{}{}
 
-		body := map[string]interface{}{
-			"code":  code,
-			"kind":  kind,
-			"value": value,
+		jsonFile, _ := cmd.Flags().GetString("json-file")
+		if jsonFile != "" {
+			fileData, err := readJSONFile(jsonFile)
+			if err != nil {
+				return err
+			}
+			body = fileData
+		}
+
+		code, _ := cmd.Flags().GetString("code")
+		if code != "" {
+			body["code"] = code
+		}
+
+		kind, _ := cmd.Flags().GetString("kind")
+		if kind != "" {
+			body["kind"] = kind
+		}
+
+		if cmd.Flags().Changed("value") {
+			value, _ := cmd.Flags().GetInt("value")
+			body["value"] = value
 		}
 
 		meetingIDs, _ := cmd.Flags().GetString("meeting-ids")
@@ -79,7 +95,12 @@ var discountCodesUpdateCmd = &cobra.Command{
 			return err
 		}
 
-		data, err := c.Patch(fmt.Sprintf("/discount-codes/%s", args[0]), discountCodeUpdateBody(cmd))
+		body, err := discountCodeUpdateBody(cmd)
+		if err != nil {
+			return err
+		}
+
+		data, err := c.Patch(fmt.Sprintf("/discount-codes/%s", args[0]), body)
 		if err != nil {
 			return err
 		}
@@ -89,8 +110,17 @@ var discountCodesUpdateCmd = &cobra.Command{
 	},
 }
 
-func discountCodeUpdateBody(cmd *cobra.Command) map[string]interface{} {
+func discountCodeUpdateBody(cmd *cobra.Command) (map[string]interface{}, error) {
 	body := map[string]interface{}{}
+
+	jsonFile, _ := cmd.Flags().GetString("json-file")
+	if jsonFile != "" {
+		fileData, err := readJSONFile(jsonFile)
+		if err != nil {
+			return nil, err
+		}
+		body = fileData
+	}
 
 	for flag, field := range map[string]string{
 		"code":       "code",
@@ -113,7 +143,7 @@ func discountCodeUpdateBody(cmd *cobra.Command) map[string]interface{} {
 		body["meeting_ids"] = splitCSV(meetingIDs)
 	}
 
-	return body
+	return body, nil
 }
 
 var discountCodesDeleteCmd = &cobra.Command{
@@ -147,7 +177,9 @@ func init() {
 	discountCodesCreateCmd.Flags().Int("value", 0, "Discount value: a whole number, 1-100 when --kind is percentage, otherwise a flat amount in the workspace default currency")
 	discountCodesCreateCmd.Flags().String("meeting-ids", "", "Comma-separated meeting SIDs")
 	discountCodesCreateCmd.Flags().String("expires-at", "", "Expiration date (YYYY-MM-DD)")
+	discountCodesCreateCmd.Flags().String("json-file", "", "Path to JSON file with discount code data")
 	markFlagsRequired(discountCodesCreateCmd, "code", "kind", "value")
+	allowJSONFileToSatisfyRequiredFlags(discountCodesCreateCmd)
 
 	discountCodesCmd.AddCommand(discountCodesUpdateCmd)
 	discountCodesUpdateCmd.Flags().String("code", "", "Discount code")
@@ -155,6 +187,7 @@ func init() {
 	discountCodesUpdateCmd.Flags().Int("value", 0, "Discount value: a whole number, 1-100 when --kind is percentage, otherwise a flat amount in the workspace default currency")
 	discountCodesUpdateCmd.Flags().String("meeting-ids", "", "Comma-separated meeting SIDs")
 	discountCodesUpdateCmd.Flags().String("expires-at", "", "Expiration date (YYYY-MM-DD)")
+	discountCodesUpdateCmd.Flags().String("json-file", "", "Path to JSON file with discount code data")
 
 	discountCodesCmd.AddCommand(discountCodesDeleteCmd)
 }

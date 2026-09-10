@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -14,6 +16,7 @@ func newDiscountCodesUpdateTestCmd() *cobra.Command {
 	cmd.Flags().Int("value", 0, "Discount value")
 	cmd.Flags().String("meeting-ids", "", "Comma-separated meeting SIDs")
 	cmd.Flags().String("expires-at", "", "Expiration date (YYYY-MM-DD)")
+	cmd.Flags().String("json-file", "", "Path to JSON file with discount code data")
 	return cmd
 }
 
@@ -23,7 +26,10 @@ func TestDiscountCodeUpdateBody_OmitsFlagsTheCallerNeverSet(t *testing.T) {
 		t.Fatalf("set code: %v", err)
 	}
 
-	body := discountCodeUpdateBody(cmd)
+	body, err := discountCodeUpdateBody(cmd)
+	if err != nil {
+		t.Fatalf("build body: %v", err)
+	}
 
 	want := map[string]interface{}{"code": "SAVE20"}
 	if !reflect.DeepEqual(body, want) {
@@ -45,7 +51,10 @@ func TestDiscountCodeUpdateBody_SendsEveryFlagTheCallerSet(t *testing.T) {
 		}
 	}
 
-	body := discountCodeUpdateBody(cmd)
+	body, err := discountCodeUpdateBody(cmd)
+	if err != nil {
+		t.Fatalf("build body: %v", err)
+	}
 
 	want := map[string]interface{}{
 		"code":        "SAVE20",
@@ -65,7 +74,39 @@ func TestDiscountCodeUpdateBody_KeepsAnExplicitZeroValue(t *testing.T) {
 		t.Fatalf("set value: %v", err)
 	}
 
-	if body := discountCodeUpdateBody(cmd); body["value"] != 0 {
+	body, err := discountCodeUpdateBody(cmd)
+	if err != nil {
+		t.Fatalf("build body: %v", err)
+	}
+	if body["value"] != 0 {
 		t.Errorf("body[value] = %v, want 0 to reach the API so it can reject it", body["value"])
+	}
+}
+
+func TestDiscountCodeUpdateBody_LetsFlagsOverrideTheJSONFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "code.json")
+	contents := `{"code":"FROMFILE","redeems_limit":5}`
+	if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+
+	cmd := newDiscountCodesUpdateTestCmd()
+	if err := cmd.Flags().Set("json-file", path); err != nil {
+		t.Fatalf("set json-file: %v", err)
+	}
+	if err := cmd.Flags().Set("code", "FROMFLAG"); err != nil {
+		t.Fatalf("set code: %v", err)
+	}
+
+	body, err := discountCodeUpdateBody(cmd)
+	if err != nil {
+		t.Fatalf("build body: %v", err)
+	}
+
+	if body["code"] != "FROMFLAG" {
+		t.Errorf("body[code] = %v, want the flag to win over the file", body["code"])
+	}
+	if body["redeems_limit"] != float64(5) {
+		t.Errorf("body[redeems_limit] = %v, want the file to supply fields that have no flag", body["redeems_limit"])
 	}
 }
