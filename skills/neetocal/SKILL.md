@@ -116,7 +116,7 @@ Required flags are marked with `*`. All list commands also accept
 | `meetings create` | — | `--name*`, `--slug*`, `--hosts*` (csv emails), `--kind` (e.g., `one_on_one`), `--spot` (e.g., `zoom`), `--duration*` (minutes, int), `--description`, `--json-file` |
 | `meetings update` | `<sid>` | `--name`, `--slug`, `--description`, `--hosts` (csv emails, optional — omit to keep current hosts), `--kind`, `--spot`, `--duration` (int), `--json-file` (partial) |
 | `meetings delete` | `<sid>` | — |
-| `meetings slots` | `<meeting-sid>` | `--year*` (int), `--month*` (int 1-12), `--day` (int), `--time-zone*` |
+| `meetings slots` | `<meeting-sid>` | `--year*` (int), `--month*` (int 1-12), `--day` (int), `--time-zone*`, `--host-email` (only that host's slots on a round-robin or multi-host meeting) |
 | `meetings one-off-link` | `<meeting-sid>` | — |
 | `meetings durations list` | `<meeting-sid>` | — |
 | `meetings durations show` | `<meeting-sid> <id>` | — |
@@ -142,10 +142,10 @@ Required flags are marked with `*`. All list commands also accept
 
 | Command | Positional | Flags |
 |---|---|---|
-| `bookings list` | — | `--host-email`, `--client-email`, `--type` (`upcoming`/`past`/`cancelled`/`incomplete`), `--sorting-key` (`created_at`/`starts_at`), `--sorting-order` (`asc`/`desc`) |
+| `bookings list` | — | `--host-email`, `--client-email`, `--type` (`upcoming`/`past`/`cancelled`/`incomplete`), `--sorting-key` (`created_at`/`starts_at`), `--sorting-order` (`asc`/`desc`), `--search` (min 3 chars; matches client name/email/sid, meeting name, host name/email and form answers, e.g. `acme.com`), `--meeting-sid`, `--starts-after` / `--starts-before` (ISO 8601 datetime or `YYYY-MM-DD`) |
 | `bookings show` | `<id>` | — |
 | `bookings create` | — | `--meeting-slug*`, `--email*`, `--name*`, `--slot-date*` (YYYY-MM-DD), `--slot-start-time*` (HH:MM), `--time-zone*`, `--preferred-meeting-spot` |
-| `bookings update` | `<id>` | `--status` (`cancelled`/`approved`/`rejected`), `--cancel-reason`, `--rejection-reason`, `--slot-date`, `--slot-start-time`, `--time-zone`, `--reschedule-reason`, `--name`, `--email` (reschedule reuses the existing booking's client details; pass `--name`/`--email` only to override) (all partial — only flags the user sets are sent) |
+| `bookings update` | `<id>` | `--status` (`cancelled`/`approved`/`rejected`), `--cancel-reason`, `--rejection-reason`, `--slot-date`, `--slot-start-time`, `--time-zone`, `--reschedule-reason`, `--preferred-meeting-spot` (only with `--slot-date`/`--slot-start-time`), `--meeting-outcome-id` (pass `""` to clear the outcome), `--name`, `--email` (reschedule reuses the existing booking's client details; pass `--name`/`--email` only to override) (all partial — only flags the user sets are sent) |
 | `bookings payments create` | `<booking-id>` | `--payment-provider*`, `--identifier`, `--discount-code` |
 | `bookings payments update` | `<booking-id> <payment-id>` | `--payment-provider*`, `--status*` (`successful`/`rejected`), `--notes` |
 
@@ -154,6 +154,21 @@ Required flags are marked with `*`. All list commands also accept
 - `bookings list` → `{"data": {"bookings": [{"id","status","starts_at","ends_at","time_zone","host_email","client_email","meeting_name",…}], "pagination":…}}`.
 - `bookings show` → `{"data": {"booking": {"id","status","starts_at","ends_at","client":{…},"host":{…},"meeting":{…},…}}}`.
 - `bookings create|update` → `{"data": {"booking": {…}}}`. `--quiet` prints the booking `id`.
+
+### Team members
+
+| Command | Positional | Flags |
+|---|---|---|
+| `team-members list` | — | `--email` |
+| `team-members show` | `<id>` | — |
+| `team-members create` | — | `--emails*` (csv), `--organization-role`, `--invited-by`, `--send-invitation-email` (bool), `--json-file` |
+| `team-members update` | `<id>` | `--email`, `--first-name`, `--last-name`, `--time-zone`, `--organization-role`, `--json-file` (partial) |
+| `team-members delete` | `<id>` | — |
+| `team-members slots` | — | `--emails*` (csv), `--duration*` (minutes, int), `--start-date*` (YYYY-MM-DD), `--end-date*` (YYYY-MM-DD, at most 31 days after start), `--time-zone*` |
+
+**Response shapes**
+
+- `team-members slots` → `{"data": {"slots": [{"starts_at":"2026-10-06T10:00:00-04:00","ends_at":"2026-10-06T10:45:00-04:00"}…]}}`. Each slot is a start time when every listed person is free for the whole duration. Not paginated.
 
 ### Availabilities
 
@@ -272,6 +287,27 @@ neetocal bookings update bkg_123 \
   --slot-start-time 14:00 \
   --time-zone "America/New_York" \
   --reschedule-reason "Client conflict" --quiet
+```
+
+### Find bookings for a domain in a date range
+```bash
+neetocal bookings list --search acme.com \
+  --starts-after 2026-10-01 --starts-before 2026-11-01 --toon
+```
+
+### Count one meeting's bookings last month
+```bash
+neetocal bookings list --meeting-sid product-demo --type past \
+  --starts-after 2026-09-01 --starts-before 2026-10-01 --json \
+  | jq '.pagination.total_records'
+```
+
+### Find a common free slot for several people
+```bash
+neetocal team-members slots \
+  --emails oliver@example.com,sam@example.com \
+  --duration 45 --start-date 2026-10-05 --end-date 2026-10-09 \
+  --time-zone "America/New_York" --toon
 ```
 
 ### Cancel with a reason

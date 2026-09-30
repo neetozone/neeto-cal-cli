@@ -200,6 +200,44 @@ var teamMembersDeleteCmd = &cobra.Command{
 	},
 }
 
+var teamMembersSlotsCmd = &cobra.Command{
+	Use:   "slots",
+	Short: "List start times when every listed person is free for the whole duration",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		c, err := getClient(cmd)
+		if err != nil {
+			return err
+		}
+
+		data, err := c.Get("/common-slots", teamMembersSlotsParams(cmd))
+		if err != nil {
+			return err
+		}
+
+		printList(data, "slots", nil)
+		return nil
+	},
+}
+
+func teamMembersSlotsParams(cmd *cobra.Command) url.Values {
+	emails, _ := cmd.Flags().GetString("emails")
+	duration, _ := cmd.Flags().GetInt("duration")
+	startDate, _ := cmd.Flags().GetString("start-date")
+	endDate, _ := cmd.Flags().GetString("end-date")
+	timeZone, _ := cmd.Flags().GetString("time-zone")
+
+	params := url.Values{}
+	for _, email := range splitCSV(emails) {
+		params.Add("emails[]", email)
+	}
+	params.Set("duration", fmt.Sprintf("%d", duration))
+	params.Set("start_date", startDate)
+	params.Set("end_date", endDate)
+	params.Set("time_zone", timeZone)
+
+	return params
+}
+
 func init() {
 	register(func(root *cobra.Command) { root.AddCommand(teamMembersCmd) })
 
@@ -227,4 +265,12 @@ func init() {
 	teamMembersUpdateCmd.Flags().String("json-file", "", "Path to JSON file with team member data")
 
 	teamMembersCmd.AddCommand(teamMembersDeleteCmd)
+
+	teamMembersCmd.AddCommand(teamMembersSlotsCmd)
+	teamMembersSlotsCmd.Flags().String("emails", "", "Comma-separated emails of the people who must all be free")
+	teamMembersSlotsCmd.Flags().Int("duration", 0, "Meeting length in minutes")
+	teamMembersSlotsCmd.Flags().String("start-date", "", "First date to search (YYYY-MM-DD)")
+	teamMembersSlotsCmd.Flags().String("end-date", "", "Last date to search (YYYY-MM-DD, at most 31 days after --start-date)")
+	teamMembersSlotsCmd.Flags().String("time-zone", "", timeZoneUsage)
+	markFlagsRequired(teamMembersSlotsCmd, "emails", "duration", "start-date", "end-date", "time-zone")
 }
