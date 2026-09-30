@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/spf13/cobra"
 )
@@ -20,32 +21,7 @@ var bookingsListCmd = &cobra.Command{
 			return err
 		}
 
-		params := paginationParams(cmd)
-
-		hostEmail, _ := cmd.Flags().GetString("host-email")
-		if hostEmail != "" {
-			params.Set("host_email", hostEmail)
-		}
-
-		clientEmail, _ := cmd.Flags().GetString("client-email")
-		if clientEmail != "" {
-			params.Set("client_email", clientEmail)
-		}
-
-		bookingType, _ := cmd.Flags().GetString("type")
-		if bookingType != "" {
-			params.Set("type", bookingType)
-		}
-
-		sortingKey, _ := cmd.Flags().GetString("sorting-key")
-		if sortingKey != "" {
-			params.Set("sorting_key", sortingKey)
-		}
-
-		sortingOrder, _ := cmd.Flags().GetString("sorting-order")
-		if sortingOrder != "" {
-			params.Set("sorting_order", sortingOrder)
-		}
+		params := bookingsListParams(cmd)
 
 		data, err := c.Get("/bookings", params)
 		if err != nil {
@@ -55,6 +31,29 @@ var bookingsListCmd = &cobra.Command{
 		printList(data, "bookings", nil)
 		return nil
 	},
+}
+
+func bookingsListParams(cmd *cobra.Command) url.Values {
+	params := paginationParams(cmd)
+
+	for flag, param := range map[string]string{
+		"host-email":    "host_email",
+		"client-email":  "client_email",
+		"type":          "type",
+		"sorting-key":   "sorting_key",
+		"sorting-order": "sorting_order",
+		"search":        "search",
+		"meeting-sid":   "meeting_sid",
+		"starts-after":  "starts_after",
+		"starts-before": "starts_before",
+	} {
+		value, _ := cmd.Flags().GetString(flag)
+		if value != "" {
+			params.Set(param, value)
+		}
+	}
+
+	return params
 }
 
 var bookingsShowCmd = &cobra.Command{
@@ -127,52 +126,7 @@ var bookingsUpdateCmd = &cobra.Command{
 			return err
 		}
 
-		body := map[string]interface{}{}
-
-		if cmd.Flags().Changed("name") {
-			name, _ := cmd.Flags().GetString("name")
-			body["name"] = name
-		}
-
-		if cmd.Flags().Changed("email") {
-			email, _ := cmd.Flags().GetString("email")
-			body["email"] = email
-		}
-
-		if cmd.Flags().Changed("status") {
-			status, _ := cmd.Flags().GetString("status")
-			body["status"] = status
-		}
-
-		if cmd.Flags().Changed("cancel-reason") {
-			cancelReason, _ := cmd.Flags().GetString("cancel-reason")
-			body["cancel_reason"] = cancelReason
-		}
-
-		if cmd.Flags().Changed("rejection-reason") {
-			rejectionReason, _ := cmd.Flags().GetString("rejection-reason")
-			body["rejection_reason"] = rejectionReason
-		}
-
-		if cmd.Flags().Changed("slot-date") {
-			slotDate, _ := cmd.Flags().GetString("slot-date")
-			body["slot_date"] = slotDate
-		}
-
-		if cmd.Flags().Changed("slot-start-time") {
-			slotStartTime, _ := cmd.Flags().GetString("slot-start-time")
-			body["slot_start_time"] = slotStartTime
-		}
-
-		if cmd.Flags().Changed("time-zone") {
-			timeZone, _ := cmd.Flags().GetString("time-zone")
-			body["time_zone"] = timeZone
-		}
-
-		if cmd.Flags().Changed("reschedule-reason") {
-			rescheduleReason, _ := cmd.Flags().GetString("reschedule-reason")
-			body["reschedule_reason"] = rescheduleReason
-		}
+		body := bookingUpdateBody(cmd)
 
 		data, err := c.Put(fmt.Sprintf("/bookings/%s", args[0]), body)
 		if err != nil {
@@ -182,6 +136,31 @@ var bookingsUpdateCmd = &cobra.Command{
 		printActionResult(data, nil)
 		return nil
 	},
+}
+
+func bookingUpdateBody(cmd *cobra.Command) map[string]interface{} {
+	body := map[string]interface{}{}
+
+	for flag, key := range map[string]string{
+		"name":                   "name",
+		"email":                  "email",
+		"status":                 "status",
+		"cancel-reason":          "cancel_reason",
+		"rejection-reason":       "rejection_reason",
+		"slot-date":              "slot_date",
+		"slot-start-time":        "slot_start_time",
+		"time-zone":              "time_zone",
+		"reschedule-reason":      "reschedule_reason",
+		"preferred-meeting-spot": "preferred_meeting_spot",
+		"meeting-outcome-id":     "meeting_outcome_id",
+	} {
+		if cmd.Flags().Changed(flag) {
+			value, _ := cmd.Flags().GetString(flag)
+			body[key] = value
+		}
+	}
+
+	return body
 }
 
 func init() {
@@ -194,6 +173,10 @@ func init() {
 	bookingsListCmd.Flags().String("type", "", "Filter by type (upcoming, past, cancelled, incomplete)")
 	bookingsListCmd.Flags().String("sorting-key", "", "Sort by field (created_at, starts_at)")
 	bookingsListCmd.Flags().String("sorting-order", "", "Sort order (asc, desc)")
+	bookingsListCmd.Flags().String("search", "", "Search text, min 3 chars (client name/email/sid, meeting name, host name/email, form answers)")
+	bookingsListCmd.Flags().String("meeting-sid", "", "Filter by meeting SID")
+	bookingsListCmd.Flags().String("starts-after", "", "Only bookings starting at or after this time (ISO 8601 datetime or YYYY-MM-DD)")
+	bookingsListCmd.Flags().String("starts-before", "", "Only bookings starting before this time (ISO 8601 datetime or YYYY-MM-DD)")
 
 	bookingsCmd.AddCommand(bookingsShowCmd)
 
@@ -217,4 +200,6 @@ func init() {
 	bookingsUpdateCmd.Flags().String("slot-start-time", "", "New slot start time (HH:MM)")
 	bookingsUpdateCmd.Flags().String("time-zone", "", timeZoneUsage)
 	bookingsUpdateCmd.Flags().String("reschedule-reason", "", "Reschedule reason")
+	bookingsUpdateCmd.Flags().String("preferred-meeting-spot", "", "Preferred meeting spot for the rescheduled slot (use with --slot-date and --slot-start-time)")
+	bookingsUpdateCmd.Flags().String("meeting-outcome-id", "", "Meeting outcome ID (pass an empty string to clear the outcome)")
 }

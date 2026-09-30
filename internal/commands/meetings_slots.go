@@ -17,19 +17,7 @@ var meetingsSlotsCmd = &cobra.Command{
 			return err
 		}
 
-		year, _ := cmd.Flags().GetInt("year")
-		month, _ := cmd.Flags().GetInt("month")
-		timeZone, _ := cmd.Flags().GetString("time-zone")
-
-		params := url.Values{}
-		params.Set("year", fmt.Sprintf("%d", year))
-		params.Set("month", fmt.Sprintf("%d", month))
-		params.Set("time_zone", timeZone)
-
-		day, _ := cmd.Flags().GetInt("day")
-		if day > 0 {
-			params.Set("day", fmt.Sprintf("%d", day))
-		}
+		params := meetingSlotsParams(cmd)
 
 		data, err := c.Get(fmt.Sprintf("/meetings/%s/slots", args[0]), params)
 		if err != nil {
@@ -41,6 +29,29 @@ var meetingsSlotsCmd = &cobra.Command{
 	},
 }
 
+func meetingSlotsParams(cmd *cobra.Command) url.Values {
+	year, _ := cmd.Flags().GetInt("year")
+	month, _ := cmd.Flags().GetInt("month")
+	timeZone, _ := cmd.Flags().GetString("time-zone")
+
+	params := url.Values{}
+	params.Set("year", fmt.Sprintf("%d", year))
+	params.Set("month", fmt.Sprintf("%d", month))
+	params.Set("time_zone", timeZone)
+
+	day, _ := cmd.Flags().GetInt("day")
+	if day > 0 {
+		params.Set("day", fmt.Sprintf("%d", day))
+	}
+
+	hostEmail, _ := cmd.Flags().GetString("host-email")
+	if hostEmail != "" {
+		params.Set("host_email", hostEmail)
+	}
+
+	return params
+}
+
 func init() {
 	meetingsCmd.AddCommand(meetingsSlotsCmd)
 
@@ -48,6 +59,7 @@ func init() {
 	meetingsSlotsCmd.Flags().Int("month", 0, "Month (1-12)")
 	meetingsSlotsCmd.Flags().Int("day", 0, "Day of month")
 	meetingsSlotsCmd.Flags().String("time-zone", "", timeZoneUsage)
+	meetingsSlotsCmd.Flags().String("host-email", "", "Only slots for this host of a round-robin or multi-host meeting")
 
 	markFlagsRequired(meetingsSlotsCmd, "year", "month", "time-zone")
 }

@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"net/url"
+	"reflect"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -55,5 +57,38 @@ func TestTeamMembersListParams_Empty(t *testing.T) {
 
 	if len(params) != 0 {
 		t.Errorf("params = %v, want empty", params)
+	}
+}
+
+func TestTeamMembersSlotsParams_SendsEmailsAsArrayAndRange(t *testing.T) {
+	cmd := &cobra.Command{Use: "slots"}
+	cmd.Flags().String("emails", "", "")
+	cmd.Flags().Int("duration", 0, "")
+	cmd.Flags().String("start-date", "", "")
+	cmd.Flags().String("end-date", "", "")
+	cmd.Flags().String("time-zone", "", "")
+	for flag, value := range map[string]string{
+		"emails":     "oliver@example.com, sam@example.com",
+		"duration":   "45",
+		"start-date": "2026-10-05",
+		"end-date":   "2026-10-09",
+		"time-zone":  "America/New_York",
+	} {
+		if err := cmd.Flags().Set(flag, value); err != nil {
+			t.Fatalf("set %s: %v", flag, err)
+		}
+	}
+
+	params := teamMembersSlotsParams(cmd)
+
+	want := url.Values{
+		"emails[]":   {"oliver@example.com", "sam@example.com"},
+		"duration":   {"45"},
+		"start_date": {"2026-10-05"},
+		"end_date":   {"2026-10-09"},
+		"time_zone":  {"America/New_York"},
+	}
+	if !reflect.DeepEqual(params, want) {
+		t.Errorf("params = %v, want %v", params, want)
 	}
 }
