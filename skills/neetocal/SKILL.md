@@ -295,6 +295,13 @@ neetocal bookings list --search acme.com \
   --starts-after 2026-10-01 --starts-before 2026-11-01 --toon
 ```
 
+### Count one meeting's bookings last month
+```bash
+neetocal bookings list --meeting-sid product-demo --type past \
+  --starts-after 2026-09-01 --starts-before 2026-10-01 --json \
+  | jq '.pagination.total_records'
+```
+
 ### Find a common free slot for several people
 ```bash
 neetocal team-members slots \
