@@ -116,7 +116,7 @@ Required flags are marked with `*`. All list commands also accept
 | `meetings create` | — | `--name*`, `--slug*`, `--hosts*` (csv emails), `--kind` (e.g., `one_on_one`), `--spot` (e.g., `zoom`), `--duration*` (minutes, int), `--description`, `--json-file` |
 | `meetings update` | `<sid>` | `--name`, `--slug`, `--description`, `--hosts` (csv emails, optional — omit to keep current hosts), `--kind`, `--spot`, `--duration` (int), `--json-file` (partial) |
 | `meetings delete` | `<sid>` | — |
-| `meetings slots` | `<meeting-sid>` | `--year*` (int), `--month*` (int 1-12), `--day` (int), `--time-zone*`, `--host-email` (only that host's slots on a round-robin or multi-host meeting) |
+| `meetings slots` | `<meeting-sid>` | `--year*` (int), `--month*` (int 1-12), `--day` (int), `--time-zone*`, `--host-email` (only that host's slots on a round-robin or multi-host meeting), `--override-availability` (every future time, including times outside availability; host or admin only) |
 | `meetings one-off-link` | `<meeting-sid>` | — |
 | `meetings durations list` | `<meeting-sid>` | — |
 | `meetings durations show` | `<meeting-sid> <id>` | — |
@@ -135,7 +135,7 @@ Required flags are marked with `*`. All list commands also accept
 - `meetings show` → `{"data": {"meeting": {"sid","name","slug","description","kind","duration","spot","hosts":[…], "availability_id",…}}}`.
 - `meetings create|update` → `{"data": {"meeting": {…}}}`. `--quiet` prints the `sid` only.
 - `meetings delete` → empty body (204). `--quiet` prints `success`.
-- `meetings slots` → `{"data": {"slots": [{"date":"YYYY-MM-DD","start_time":"HH:MM","end_time":"HH:MM"}…]}}`.
+- `meetings slots` → `{"data": {"slots": [{"date":"YYYY-MM-DD","start_time":"HH:MM","end_time":"HH:MM"}…]}}`. With `--override-availability` each slot also has `is_available` and `already_overridden` (another overridden booking already takes it).
 - `meetings one-off-link` → `{"data": {"url": "https://…"}}`.
 
 ### Bookings
@@ -144,8 +144,8 @@ Required flags are marked with `*`. All list commands also accept
 |---|---|---|
 | `bookings list` | — | `--host-email`, `--client-email`, `--type` (`upcoming`/`past`/`cancelled`/`incomplete`), `--sorting-key` (`created_at`/`starts_at`), `--sorting-order` (`asc`/`desc`), `--search` (min 3 chars; matches client name/email/sid, meeting name, host name/email and form answers, e.g. `acme.com`), `--meeting-sid`, `--starts-after` / `--starts-before` (ISO 8601 datetime or `YYYY-MM-DD`) |
 | `bookings show` | `<id>` | — |
-| `bookings create` | — | `--meeting-slug*`, `--email*`, `--name*`, `--slot-date*` (YYYY-MM-DD), `--slot-start-time*` (HH:MM), `--time-zone*`, `--preferred-meeting-spot` |
-| `bookings update` | `<id>` | `--status` (`cancelled`/`approved`/`rejected`), `--cancel-reason`, `--rejection-reason`, `--slot-date`, `--slot-start-time`, `--time-zone`, `--reschedule-reason`, `--preferred-meeting-spot` (only with `--slot-date`/`--slot-start-time`), `--meeting-outcome-id` (pass `""` to clear the outcome), `--name`, `--email` (reschedule reuses the existing booking's client details; pass `--name`/`--email` only to override) (all partial — only flags the user sets are sent) |
+| `bookings create` | — | `--meeting-slug*`, `--email*`, `--name*`, `--slot-date*` (YYYY-MM-DD), `--slot-start-time*` (HH:MM), `--time-zone*`, `--preferred-meeting-spot`, `--override-availability` (book outside the meeting's availability; host or admin only), `--host-email` (host to assign on a multi-host meeting; needs `--override-availability` unless clients can choose the host) |
+| `bookings update` | `<id>` | `--status` (`cancelled`/`approved`/`rejected`), `--cancel-reason`, `--rejection-reason`, `--slot-date`, `--slot-start-time`, `--time-zone`, `--reschedule-reason`, `--preferred-meeting-spot` (only with `--slot-date`/`--slot-start-time`), `--meeting-outcome-id` (pass `""` to clear the outcome), `--name`, `--email` (reschedule reuses the existing booking's client details; pass `--name`/`--email` only to override), `--override-availability` (reschedule outside the meeting's availability; host or admin only; keeps the current host) (all partial — only flags the user sets are sent) |
 | `bookings payments create` | `<booking-id>` | `--payment-provider*`, `--identifier`, `--discount-code` |
 | `bookings payments update` | `<booking-id> <payment-id>` | `--payment-provider*`, `--status*` (`successful`/`rejected`), `--notes` |
 
@@ -153,7 +153,7 @@ Required flags are marked with `*`. All list commands also accept
 
 - `bookings list` → `{"data": {"bookings": [{"id","status","starts_at","ends_at","time_zone","host_email","client_email","meeting_name",…}], "pagination":…}}`.
 - `bookings show` → `{"data": {"booking": {"id","status","starts_at","ends_at","client":{…},"host":{…},"meeting":{…},…}}}`.
-- `bookings create|update` → `{"data": {"booking": {…}}}`. `--quiet` prints the booking `id`.
+- `bookings create|update` → `{"data": {"booking": {…}}}`. `--quiet` prints the booking `id`. The booking has `is_overridden`; with `--override-availability` it also has `bypassed_rules`, the availability rules that were skipped.
 
 ### Team members
 
@@ -287,6 +287,22 @@ neetocal bookings update bkg_123 \
   --slot-start-time 14:00 \
   --time-zone "America/New_York" \
   --reschedule-reason "Client conflict" --quiet
+```
+
+### Book or reschedule outside availability
+Only a host of the meeting or an admin can do this. Past times are still refused, and a host can't have two overridden bookings at the same time.
+```bash
+# Times that can be booked with the override (taken ones show already_overridden)
+neetocal meetings slots mtg_abc123 --year 2026 --month 10 --day 5 \
+  --time-zone "America/New_York" --override-availability --toon
+
+neetocal bookings create --meeting-slug product-demo \
+  --name "Eve Smith" --email eve@example.com \
+  --slot-date 2026-10-05 --slot-start-time 20:00 \
+  --time-zone "America/New_York" --override-availability
+
+neetocal bookings update bkg_123 --slot-date 2026-10-05 --slot-start-time 21:00 \
+  --time-zone "America/New_York" --override-availability --quiet
 ```
 
 ### Find bookings for a domain in a date range

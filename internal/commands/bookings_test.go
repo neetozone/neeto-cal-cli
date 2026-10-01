@@ -27,7 +27,104 @@ func newBookingsUpdateTestCmd() *cobra.Command {
 	} {
 		cmd.Flags().String(flag, "", "")
 	}
+	cmd.Flags().Bool("override-availability", false, "")
 	return cmd
+}
+
+func newBookingsCreateTestCmd() *cobra.Command {
+	cmd := &cobra.Command{Use: "create"}
+	for _, flag := range []string{
+		"meeting-slug", "email", "name", "slot-date", "slot-start-time", "time-zone",
+		"preferred-meeting-spot", "host-email",
+	} {
+		cmd.Flags().String(flag, "", "")
+	}
+	cmd.Flags().Bool("override-availability", false, "")
+	return cmd
+}
+
+func setFlags(t *testing.T, cmd *cobra.Command, values map[string]string) {
+	t.Helper()
+	for flag, value := range values {
+		if err := cmd.Flags().Set(flag, value); err != nil {
+			t.Fatalf("set %s: %v", flag, err)
+		}
+	}
+}
+
+var requiredBookingCreateFlags = map[string]string{
+	"meeting-slug":    "meeting-with-oliver",
+	"email":           "eve@example.com",
+	"name":            "Eve Smith",
+	"slot-date":       "2026-10-05",
+	"slot-start-time": "08:00 PM",
+	"time-zone":       "Asia/Kolkata",
+}
+
+var requiredBookingCreateBody = map[string]interface{}{
+	"meeting_slug":    "meeting-with-oliver",
+	"email":           "eve@example.com",
+	"name":            "Eve Smith",
+	"slot_date":       "2026-10-05",
+	"slot_start_time": "08:00 PM",
+	"time_zone":       "Asia/Kolkata",
+}
+
+func TestBookingCreateBody_SendsOnlyTheRequiredFieldsByDefault(t *testing.T) {
+	cmd := newBookingsCreateTestCmd()
+	setFlags(t, cmd, requiredBookingCreateFlags)
+
+	body := bookingCreateBody(cmd)
+
+	if !reflect.DeepEqual(body, requiredBookingCreateBody) {
+		t.Errorf("body = %v, want %v", body, requiredBookingCreateBody)
+	}
+}
+
+func TestBookingCreateBody_SendsOverrideAvailabilityAndHostEmail(t *testing.T) {
+	cmd := newBookingsCreateTestCmd()
+	setFlags(t, cmd, requiredBookingCreateFlags)
+	setFlags(t, cmd, map[string]string{
+		"override-availability":  "true",
+		"host-email":             "oliver@example.com",
+		"preferred-meeting-spot": "zoom",
+	})
+
+	body := bookingCreateBody(cmd)
+
+	want := map[string]interface{}{
+		"override_availability":  true,
+		"host_email":             "oliver@example.com",
+		"preferred_meeting_spot": "zoom",
+	}
+	for key, value := range requiredBookingCreateBody {
+		want[key] = value
+	}
+	if !reflect.DeepEqual(body, want) {
+		t.Errorf("body = %v, want %v", body, want)
+	}
+}
+
+func TestBookingUpdateBody_SendsOverrideAvailabilityWithTheReschedule(t *testing.T) {
+	cmd := newBookingsUpdateTestCmd()
+	setFlags(t, cmd, map[string]string{
+		"slot-date":             "2026-10-05",
+		"slot-start-time":       "09:00 PM",
+		"time-zone":             "Asia/Kolkata",
+		"override-availability": "true",
+	})
+
+	body := bookingUpdateBody(cmd)
+
+	want := map[string]interface{}{
+		"slot_date":             "2026-10-05",
+		"slot_start_time":       "09:00 PM",
+		"time_zone":             "Asia/Kolkata",
+		"override_availability": true,
+	}
+	if !reflect.DeepEqual(body, want) {
+		t.Errorf("body = %v, want %v", body, want)
+	}
 }
 
 func TestBookingsListParams_SendsSearchAndDateRangeFilters(t *testing.T) {

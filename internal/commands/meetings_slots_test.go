@@ -13,6 +13,7 @@ func newMeetingsSlotsTestCmd() *cobra.Command {
 	cmd.Flags().Int("day", 0, "")
 	cmd.Flags().String("time-zone", "", "")
 	cmd.Flags().String("host-email", "", "")
+	cmd.Flags().Bool("override-availability", false, "")
 	return cmd
 }
 
@@ -46,5 +47,28 @@ func TestMeetingSlotsParams_OmitsHostEmailWhenUnset(t *testing.T) {
 
 	if params.Has("host_email") {
 		t.Errorf("host_email = %q, want absent", params.Get("host_email"))
+	}
+}
+
+func TestMeetingSlotsParams_SendsOverrideAvailability(t *testing.T) {
+	cmd := newMeetingsSlotsTestCmd()
+	if err := cmd.Flags().Set("override-availability", "true"); err != nil {
+		t.Fatalf("set override-availability: %v", err)
+	}
+
+	params := meetingSlotsParams(cmd)
+
+	if got := params.Get("override_availability"); got != "true" {
+		t.Errorf("override_availability = %q, want true", got)
+	}
+}
+
+func TestMeetingSlotsParams_OmitsOverrideAvailabilityWhenUnset(t *testing.T) {
+	cmd := newMeetingsSlotsTestCmd()
+
+	params := meetingSlotsParams(cmd)
+
+	if params.Has("override_availability") {
+		t.Errorf("override_availability = %q, want absent", params.Get("override_availability"))
 	}
 }
