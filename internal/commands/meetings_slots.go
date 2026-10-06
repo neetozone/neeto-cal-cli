@@ -9,7 +9,7 @@ import (
 
 var meetingsSlotsCmd = &cobra.Command{
 	Use:   "slots <meeting-sid>",
-	Short: "List available slots for a meeting",
+	Short: "List bookable slots for a meeting",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := getClient(cmd)
@@ -49,6 +49,10 @@ func meetingSlotsParams(cmd *cobra.Command) url.Values {
 		params.Set("host_email", hostEmail)
 	}
 
+	if override, _ := cmd.Flags().GetBool("override-availability"); override {
+		params.Set("override_availability", "true")
+	}
+
 	return params
 }
 
@@ -60,6 +64,7 @@ func init() {
 	meetingsSlotsCmd.Flags().Int("day", 0, "Day of month")
 	meetingsSlotsCmd.Flags().String("time-zone", "", timeZoneUsage)
 	meetingsSlotsCmd.Flags().String("host-email", "", "Only slots for this host of a round-robin or multi-host meeting")
+	meetingsSlotsCmd.Flags().Bool("override-availability", false, "List every future time, including times outside availability, that can be booked with --override-availability (host or admin only)")
 
 	markFlagsRequired(meetingsSlotsCmd, "year", "month", "time-zone")
 }

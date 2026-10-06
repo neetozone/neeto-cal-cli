@@ -85,28 +85,7 @@ var bookingsCreateCmd = &cobra.Command{
 			return err
 		}
 
-		meetingSlug, _ := cmd.Flags().GetString("meeting-slug")
-		email, _ := cmd.Flags().GetString("email")
-		name, _ := cmd.Flags().GetString("name")
-		slotDate, _ := cmd.Flags().GetString("slot-date")
-		slotStartTime, _ := cmd.Flags().GetString("slot-start-time")
-		timeZone, _ := cmd.Flags().GetString("time-zone")
-
-		body := map[string]interface{}{
-			"meeting_slug":    meetingSlug,
-			"email":           email,
-			"name":            name,
-			"slot_date":       slotDate,
-			"slot_start_time": slotStartTime,
-			"time_zone":       timeZone,
-		}
-
-		preferredSpot, _ := cmd.Flags().GetString("preferred-meeting-spot")
-		if preferredSpot != "" {
-			body["preferred_meeting_spot"] = preferredSpot
-		}
-
-		data, err := c.Post("/bookings", body)
+		data, err := c.Post("/bookings", bookingCreateBody(cmd))
 		if err != nil {
 			return err
 		}
@@ -114,6 +93,38 @@ var bookingsCreateCmd = &cobra.Command{
 		printActionResult(data, nil)
 		return nil
 	},
+}
+
+func bookingCreateBody(cmd *cobra.Command) map[string]interface{} {
+	body := map[string]interface{}{}
+
+	for flag, key := range map[string]string{
+		"meeting-slug":    "meeting_slug",
+		"email":           "email",
+		"name":            "name",
+		"slot-date":       "slot_date",
+		"slot-start-time": "slot_start_time",
+		"time-zone":       "time_zone",
+	} {
+		value, _ := cmd.Flags().GetString(flag)
+		body[key] = value
+	}
+
+	for flag, key := range map[string]string{
+		"preferred-meeting-spot": "preferred_meeting_spot",
+		"host-email":             "host_email",
+	} {
+		value, _ := cmd.Flags().GetString(flag)
+		if value != "" {
+			body[key] = value
+		}
+	}
+
+	if override, _ := cmd.Flags().GetBool("override-availability"); override {
+		body["override_availability"] = true
+	}
+
+	return body
 }
 
 var bookingsUpdateCmd = &cobra.Command{
@@ -160,6 +171,10 @@ func bookingUpdateBody(cmd *cobra.Command) map[string]interface{} {
 		}
 	}
 
+	if override, _ := cmd.Flags().GetBool("override-availability"); override {
+		body["override_availability"] = true
+	}
+
 	return body
 }
 
@@ -188,6 +203,8 @@ func init() {
 	bookingsCreateCmd.Flags().String("slot-start-time", "", "Slot start time (HH:MM)")
 	bookingsCreateCmd.Flags().String("time-zone", "", timeZoneUsage)
 	bookingsCreateCmd.Flags().String("preferred-meeting-spot", "", "Preferred meeting spot")
+	bookingsCreateCmd.Flags().Bool("override-availability", false, "Book the slot even if it is outside the meeting's availability (host or admin only)")
+	bookingsCreateCmd.Flags().String("host-email", "", "Host to assign on a meeting with several hosts (needs --override-availability unless clients can choose the host)")
 	markFlagsRequired(bookingsCreateCmd, "meeting-slug", "email", "name", "slot-date", "slot-start-time", "time-zone")
 
 	bookingsCmd.AddCommand(bookingsUpdateCmd)
@@ -202,4 +219,5 @@ func init() {
 	bookingsUpdateCmd.Flags().String("reschedule-reason", "", "Reschedule reason")
 	bookingsUpdateCmd.Flags().String("preferred-meeting-spot", "", "Preferred meeting spot for the rescheduled slot (use with --slot-date and --slot-start-time)")
 	bookingsUpdateCmd.Flags().String("meeting-outcome-id", "", "Meeting outcome ID (pass an empty string to clear the outcome)")
+	bookingsUpdateCmd.Flags().Bool("override-availability", false, "Reschedule even if the new slot is outside the meeting's availability (host or admin only; use with --slot-date and --slot-start-time)")
 }
