@@ -9,7 +9,7 @@ import (
 
 var meetingsSlotsCmd = &cobra.Command{
 	Use:   "slots <meeting-sid>",
-	Short: "List available slots for a meeting",
+	Short: "List bookable slots for a meeting",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := getClient(cmd)
