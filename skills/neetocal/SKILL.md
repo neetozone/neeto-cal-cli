@@ -128,6 +128,8 @@ Required flags are marked with `*`. All list commands also accept
 | `meetings spots create` | `<meeting-sid>` | `--spot*`, `--is-default`, `--phone-number`, `--location`, `--custom-text` |
 | `meetings spots update` | `<meeting-sid> <id>` | same as create (partial) |
 | `meetings spots delete` | `<meeting-sid> <id>` | — |
+| `meetings calendar-preferences show` | `<meeting-sid> <integration>` (`google_calendar`, `outlook`, `icloud`) | — |
+| `meetings calendar-preferences update` | `<meeting-sid> <integration>` | `--override-calendars`, `--event-add-calendar-ids` (csv, in order), `--override-conflict-check-calendars`, `--conflict-check-calendar-ids` (csv), `--busy-statuses` (csv, Outlook only), `--override-event-layout`, `--summary-type`, `--custom-summary`, `--body`, `--event-color` (Google only), `--json-file` (partial) |
 
 **Response shapes**
 
@@ -137,6 +139,7 @@ Required flags are marked with `*`. All list commands also accept
 - `meetings delete` → empty body (204). `--quiet` prints `success`.
 - `meetings slots` → `{"data": {"slots": [{"date":"YYYY-MM-DD","start_time":"HH:MM","end_time":"HH:MM"}…]}}`. With `--override-availability` each slot also has `is_available` and `already_overridden` (another overridden booking already takes it).
 - `meetings one-off-link` → `{"data": {"url": "https://…"}}`.
+- `meetings calendar-preferences show|update` → `{"data": {"calendar_preference": {"integration","override_calendars","event_add_calendars":[{"id","name","is_primary","is_editable"}],"override_conflict_check_calendars","conflict_check_calendars":[…],"busy_statuses","override_event_layout","summary_type","custom_summary","body","event_color","available_calendars":[…]}}}`. Pick calendar IDs from `available_calendars`: these are the host's calendars, and the list is empty unless the meeting is one-on-one. `update` changes only the flags passed. Turn a switch off with `--override-calendars=false`, and clear a list with `--event-add-calendar-ids ""`. Calendar overrides work only on one-on-one meetings, and read-only calendars (`is_editable: false`) can't receive events. `summary_type` is one of `host_and_client`, `client_and_host`, `meeting_name` or `custom` (`custom` needs `--custom-summary`). Group meetings allow only `meeting_name` and `custom`, and keep `--override-event-layout` on.
 
 ### Bookings
 
@@ -343,6 +346,17 @@ done
 ### Create a one-off meeting link
 ```bash
 neetocal meetings one-off-link mtg_abc123
+```
+
+### Send a meeting's bookings to a specific calendar
+```bash
+# 1. Find the host's calendar IDs
+neetocal meetings calendar-preferences show mtg_abc123 google_calendar --toon
+
+# 2. Add booking events to those calendars and check only one of them for conflicts
+neetocal meetings calendar-preferences update mtg_abc123 google_calendar \
+  --override-calendars --event-add-calendar-ids "<work-id>,<personal-id>" \
+  --override-conflict-check-calendars --conflict-check-calendar-ids "<work-id>"
 ```
 
 ### Provision an availability from JSON
