@@ -277,7 +277,7 @@ func TestBookingCreateBody_SendsPhoneMetadataFormResponsesAndAddOns(t *testing.T
 
 func TestBookingCreateBody_RejectsInvalidMetadata(t *testing.T) {
 	cmd := newBookingsCreateTestCmd()
-	setFlags(t, cmd, map[string]string{"metadata": "not json"})
+	setFlags(t, cmd, map[string]string{"email": "eve@example.com", "metadata": "not json"})
 
 	_, err := bookingCreateBody(cmd)
 
@@ -288,7 +288,7 @@ func TestBookingCreateBody_RejectsInvalidMetadata(t *testing.T) {
 
 func TestBookingCreateBody_RejectsInvalidFormResponses(t *testing.T) {
 	cmd := newBookingsCreateTestCmd()
-	setFlags(t, cmd, map[string]string{"form-responses": "[1]"})
+	setFlags(t, cmd, map[string]string{"email": "eve@example.com", "form-responses": "[1]"})
 
 	_, err := bookingCreateBody(cmd)
 
@@ -320,5 +320,25 @@ func TestBookingsListParams_SendsParentBookingID(t *testing.T) {
 
 	if got := params.Get("parent_booking_id"); got != "bkg_1" {
 		t.Errorf("parent_booking_id = %q, want bkg_1", got)
+	}
+}
+
+func TestBookingCreateBody_RequiresEmailOrPhoneNumber(t *testing.T) {
+	cmd := newBookingsCreateTestCmd()
+	setFlags(t, cmd, requiredBookingCreateFlags)
+	setFlags(t, cmd, map[string]string{"email": ""})
+
+	if _, err := bookingCreateBody(cmd); err == nil {
+		t.Error("err = nil, want error when neither email nor phonenumber is given")
+	}
+}
+
+func TestBookingCreateBody_AcceptsPhoneNumberWithoutEmail(t *testing.T) {
+	cmd := newBookingsCreateTestCmd()
+	setFlags(t, cmd, requiredBookingCreateFlags)
+	setFlags(t, cmd, map[string]string{"email": "", "phonenumber": "+15551234567"})
+
+	if _, err := bookingCreateBody(cmd); err != nil {
+		t.Errorf("err = %v, want nil", err)
 	}
 }

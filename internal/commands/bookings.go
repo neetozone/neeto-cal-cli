@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 
@@ -113,6 +114,12 @@ func bookingCreateBody(cmd *cobra.Command) (map[string]interface{}, error) {
 	} {
 		value, _ := cmd.Flags().GetString(flag)
 		body[key] = value
+	}
+
+	email, _ := cmd.Flags().GetString("email")
+	phoneNumber, _ := cmd.Flags().GetString("phonenumber")
+	if email == "" && phoneNumber == "" {
+		return nil, errors.New("pass --email or --phonenumber")
 	}
 
 	for flag, key := range map[string]string{

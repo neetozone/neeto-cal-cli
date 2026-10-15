@@ -66,3 +66,12 @@ func TestPrefillTokenBody_RejectsInvalidData(t *testing.T) {
 		t.Error("err = nil, want invalid JSON error")
 	}
 }
+
+func TestPrefillTokenBody_RejectsDataAndJSONFileTogether(t *testing.T) {
+	cmd := newPrefillTokenTestCmd()
+	setFlags(t, cmd, map[string]string{"data": `{"name":"Oliver Smith"}`, "json-file": "answers.json"})
+
+	if _, err := prefillTokenBody(cmd); err == nil {
+		t.Error("err = nil, want error when both flags are given")
+	}
+}

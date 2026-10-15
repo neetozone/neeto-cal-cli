@@ -41,6 +41,10 @@ func prefillTokenBody(cmd *cobra.Command) (map[string]interface{}, error) {
 	jsonFile, _ := cmd.Flags().GetString("json-file")
 	raw, _ := cmd.Flags().GetString("data")
 
+	if jsonFile != "" && raw != "" {
+		return nil, errors.New("pass only one of --data or --json-file")
+	}
+
 	switch {
 	case jsonFile != "":
 		fileData, err := readJSONFile(jsonFile)
