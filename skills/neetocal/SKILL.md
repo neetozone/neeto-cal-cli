@@ -116,13 +116,19 @@ Required flags are marked with `*`. All list commands also accept
 | `meetings create` | — | `--name*`, `--slug*`, `--hosts*` (csv emails), `--kind` (e.g., `one_on_one`), `--spot` (e.g., `zoom`), `--duration*` (minutes, int), `--description`, `--json-file` |
 | `meetings update` | `<sid>` | `--name`, `--slug`, `--description`, `--hosts` (csv emails, optional — omit to keep current hosts), `--kind`, `--spot`, `--duration` (int), `--json-file` (partial) |
 | `meetings delete` | `<sid>` | — |
-| `meetings slots` | `<meeting-sid>` | `--year*` (int), `--month*` (int 1-12), `--day` (int), `--time-zone*`, `--host-email` (only that host's slots on a round-robin or multi-host meeting), `--override-availability` (every future time, including times outside availability; host or admin only) |
+| `meetings slots` | `<meeting-sid>` | `--year*` (int), `--month*` (int 1-12), `--day` (int), `--time-zone*`, `--host-email` (only that host's slots on a round-robin or multi-host meeting), `--override-availability` (every future time, including times outside availability; host or admin only), `--duration` (int minutes; must be one of the meeting's durations), `--add-on-service-ids` (csv; their time is added to the slot) |
+| `meetings unavailable-slots` | `<meeting-sid>` | `--year*` (int), `--month*` (int 1-12), `--time-zone*`, `--day` (int), `--host-email`, `--duration` (int minutes). Host or admin only. Explains why times are blocked |
 | `meetings one-off-link` | `<meeting-sid>` | — |
 | `meetings durations list` | `<meeting-sid>` | — |
 | `meetings durations show` | `<meeting-sid> <id>` | — |
 | `meetings durations create` | `<meeting-sid>` | `--duration*` (int), `--is-default` (bool) |
 | `meetings durations update` | `<meeting-sid> <id>` | `--duration`, `--is-default` (partial) |
 | `meetings durations delete` | `<meeting-sid> <id>` | — |
+| `meetings add-on-services list` | `<meeting-sid>` | — |
+| `meetings add-on-services show` | `<meeting-sid> <id>` | — |
+| `meetings add-on-services create` | `<meeting-sid>` | `--name*`, `--description`, `--duration` (extra minutes, int), `--position` (int, from 1), `--price` (e.g. `25.00`; `0` is free) |
+| `meetings add-on-services update` | `<meeting-sid> <id>` | same as create (partial) |
+| `meetings add-on-services delete` | `<meeting-sid> <id>` | — |
 | `meetings spots list` | `<meeting-sid>` | — |
 | `meetings spots show` | `<meeting-sid> <id>` | — |
 | `meetings spots create` | `<meeting-sid>` | `--spot*`, `--is-default`, `--phone-number`, `--location`, `--custom-text` |
@@ -145,12 +151,12 @@ Required flags are marked with `*`. All list commands also accept
 
 | Command | Positional | Flags |
 |---|---|---|
-| `bookings list` | — | `--host-email`, `--client-email`, `--type` (`upcoming`/`past`/`cancelled`/`incomplete`), `--sorting-key` (`created_at`/`starts_at`), `--sorting-order` (`asc`/`desc`), `--search` (min 3 chars; matches client name/email/sid, meeting name, host name/email and form answers, e.g. `acme.com`), `--meeting-sid`, `--starts-after` / `--starts-before` (ISO 8601 datetime or `YYYY-MM-DD`) |
+| `bookings list` | — | `--host-email`, `--client-email`, `--type` (`upcoming`/`past`/`cancelled`/`incomplete`), `--sorting-key` (`created_at`/`starts_at`), `--sorting-order` (`asc`/`desc`), `--search` (min 3 chars; matches client name/email/sid, meeting name, host name/email and form answers, e.g. `acme.com`), `--meeting-sid`, `--starts-after` / `--starts-before` (ISO 8601 datetime or `YYYY-MM-DD`), `--parent-booking-id` (only bookings created together with this booking, such as pre-bookings) |
 | `bookings show` | `<id>` | — |
-| `bookings create` | — | `--meeting-slug*`, `--email*`, `--name*`, `--slot-date*` (YYYY-MM-DD), `--slot-start-time*` (HH:MM), `--time-zone*`, `--preferred-meeting-spot`, `--override-availability` (book outside the meeting's availability; host or admin only), `--host-email` (host to assign on a multi-host meeting; needs `--override-availability` unless clients can choose the host) |
-| `bookings update` | `<id>` | `--status` (`cancelled`/`approved`/`rejected`), `--cancel-reason`, `--rejection-reason`, `--slot-date`, `--slot-start-time`, `--time-zone`, `--reschedule-reason`, `--preferred-meeting-spot` (only with `--slot-date`/`--slot-start-time`), `--meeting-outcome-id` (pass `""` to clear the outcome), `--name`, `--email` (reschedule reuses the existing booking's client details; pass `--name`/`--email` only to override), `--override-availability` (reschedule outside the meeting's availability; host or admin only; keeps the current host) (all partial — only flags the user sets are sent) |
-| `bookings payments create` | `<booking-id>` | `--payment-provider*`, `--identifier`, `--discount-code` |
-| `bookings payments update` | `<booking-id> <payment-id>` | `--payment-provider*`, `--status*` (`successful`/`rejected`), `--notes` |
+| `bookings create` | — | `--meeting-slug*`, `--email` (required unless the meeting identifies clients by phone; pass `--email` or `--phonenumber`), `--phonenumber` (international format; required when the meeting identifies clients by phone), `--name*`, `--slot-date*` (YYYY-MM-DD), `--slot-start-time*` (HH:MM), `--time-zone*`, `--preferred-meeting-spot`, `--override-availability` (book outside the meeting's availability; host or admin only), `--host-email` (host to assign on a multi-host meeting; needs `--override-availability` unless clients can choose the host), `--metadata` (JSON object, e.g. `'{"source":"crm"}'`), `--form-responses` (JSON object keyed by question field code), `--add-on-service-ids` (csv), `--reserve-slot` (reserve without a payment link), `--send-payment-link` (default true; `--send-payment-link=false` to skip) |
+| `bookings update` | `<id>` | `--status` (`cancelled`/`approved`/`rejected`), `--cancel-reason`, `--rejection-reason`, `--slot-date`, `--slot-start-time`, `--time-zone`, `--reschedule-reason`, `--preferred-meeting-spot` (only with `--slot-date`/`--slot-start-time`), `--meeting-outcome-id` (pass `""` to clear the outcome), `--name`, `--phonenumber`, `--metadata` (JSON object, used when rescheduling), `--email` (reschedule reuses the existing booking's client details; pass `--name`/`--email` only to override), `--override-availability` (reschedule outside the meeting's availability; host or admin only; keeps the current host) (all partial — only flags the user sets are sent) |
+| `bookings payments create` | `<booking-id>` | `--payment-provider*`, `--identifier`, `--discount-code`, `--idempotency-key` (a retried request returns the same payment), `--amount` and `--currency` (cash only, for a meeting with no cash price; e.g. `150.00` `USD`), `--tip-value` (float percent), `--tip-is-custom` |
+| `bookings payments update` | `<booking-id> <payment-id>` | `--payment-provider*`, `--status*` (`successful`/`rejected`), `--notes`, `--vpa-address` (UPI VPA the payment was received on), `--performer-id` (team member confirming the payment; ignored when logged in as a user) |
 
 **Response shapes**
 
@@ -223,6 +229,34 @@ Typical `--json-file` payload:
   ]
 }
 ```
+
+### Holidays
+
+| Command | Positional | Flags |
+|---|---|---|
+| `holidays list` | — | `--search`, `--from-date` (YYYY-MM-DD; recurring holidays are always included), `--to-date` (YYYY-MM-DD), `--include-disabled` |
+
+A holiday blocks every host for the whole day unless the host's availability has a date override for it.
+
+### Meeting outcomes
+
+| Command | Positional | Flags |
+|---|---|---|
+| `meeting-outcomes list` | — | `--search` (not paginated) |
+| `meeting-outcomes show` | `<id>` | — |
+| `meeting-outcomes create` | — | `--name*`, `--color*` (`blue`/`orange`/`gray`/`red`/`yellow`/`violet`/`pink`/`teal`/`cyan`/`green`) |
+| `meeting-outcomes update` | `<id>` | `--name`, `--color` (partial) |
+| `meeting-outcomes delete` | `<id>` | — |
+
+Set an outcome on a booking with `bookings update <id> --meeting-outcome-id <id>`.
+
+### Prefill tokens
+
+| Command | Positional | Flags |
+|---|---|---|
+| `prefill-tokens create` | — | `--data` (JSON object keyed by question field code) or `--json-file` (path to such an object); pass exactly one |
+
+Returns a token. Append it to a booking link as `?prefill_token=<token>` to open the form already filled in.
 
 ### Packages & discount codes
 
@@ -329,6 +363,26 @@ neetocal team-members slots \
   --time-zone "America/New_York" --toon
 ```
 
+### Find out why a meeting has no slots
+```bash
+neetocal meetings unavailable-slots mtg_abc123 --year 2026 --month 10 \
+  --time-zone "America/New_York" --json | jq '.data[] | {date, day_reasons, blocked}'
+neetocal holidays list --from-date 2026-10-01 --to-date 2026-10-31
+```
+
+### Slots for a longer duration
+```bash
+neetocal meetings slots mtg_abc123 --year 2026 --month 10 --day 21 \
+  --time-zone "America/New_York" --duration 60
+```
+
+### Record a cash payment
+```bash
+neetocal bookings payments create bkg_123 --payment-provider cash
+# add --amount 150.00 --currency USD when the meeting has no price
+neetocal bookings payments update bkg_123 <payment-id> --payment-provider cash --status successful
+```
+
 ### Cancel with a reason
 ```bash
 neetocal bookings update bkg_123 --status cancelled --cancel-reason "No longer needed" --quiet
@@ -374,6 +428,8 @@ neetocal availabilities create \
 | Pipe an identifier into another command or into `jq` | `--quiet` |
 | Produce a machine-readable payload (with pagination metadata) | `--json` |
 | Interactive TTY browsing | no flag |
+
+A member without org-wide booking access sees only the bookings they host (and the ones they booked when their role allows) in `bookings list`, `bookings show` and `team-members slots`.
 
 ## Error surface
 

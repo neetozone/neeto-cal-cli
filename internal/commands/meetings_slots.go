@@ -53,6 +53,16 @@ func meetingSlotsParams(cmd *cobra.Command) url.Values {
 		params.Set("override_availability", "true")
 	}
 
+	duration, _ := cmd.Flags().GetInt("duration")
+	if duration > 0 {
+		params.Set("duration", fmt.Sprintf("%d", duration))
+	}
+
+	addOnServiceIDs, _ := cmd.Flags().GetString("add-on-service-ids")
+	for _, id := range splitCSV(addOnServiceIDs) {
+		params.Add("add_on_service_ids[]", id)
+	}
+
 	return params
 }
 
@@ -65,6 +75,8 @@ func init() {
 	meetingsSlotsCmd.Flags().String("time-zone", "", timeZoneUsage)
 	meetingsSlotsCmd.Flags().String("host-email", "", "Only slots for this host of a round-robin or multi-host meeting")
 	meetingsSlotsCmd.Flags().Bool("override-availability", false, "List every future time, including times outside availability, that can be booked with --override-availability (host or admin only)")
+	meetingsSlotsCmd.Flags().Int("duration", 0, "Slot length in minutes; must be one of the meeting's durations")
+	meetingsSlotsCmd.Flags().String("add-on-service-ids", "", "Comma-separated add-on service IDs whose time is added to the slot")
 
 	markFlagsRequired(meetingsSlotsCmd, "year", "month", "time-zone")
 }

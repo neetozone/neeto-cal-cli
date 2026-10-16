@@ -2,6 +2,7 @@ package commands
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -12,7 +13,7 @@ func newBookingsListTestCmd() *cobra.Command {
 	addPaginationFlags(cmd)
 	for _, flag := range []string{
 		"host-email", "client-email", "type", "sorting-key", "sorting-order",
-		"search", "meeting-sid", "starts-after", "starts-before",
+		"search", "meeting-sid", "starts-after", "starts-before", "parent-booking-id",
 	} {
 		cmd.Flags().String(flag, "", "")
 	}
@@ -24,6 +25,7 @@ func newBookingsUpdateTestCmd() *cobra.Command {
 	for _, flag := range []string{
 		"name", "email", "status", "cancel-reason", "rejection-reason", "slot-date",
 		"slot-start-time", "time-zone", "reschedule-reason", "preferred-meeting-spot", "meeting-outcome-id",
+		"phonenumber", "metadata",
 	} {
 		cmd.Flags().String(flag, "", "")
 	}
@@ -35,11 +37,13 @@ func newBookingsCreateTestCmd() *cobra.Command {
 	cmd := &cobra.Command{Use: "create"}
 	for _, flag := range []string{
 		"meeting-slug", "email", "name", "slot-date", "slot-start-time", "time-zone",
-		"preferred-meeting-spot", "host-email",
+		"preferred-meeting-spot", "host-email", "phonenumber", "metadata", "form-responses", "add-on-service-ids",
 	} {
 		cmd.Flags().String(flag, "", "")
 	}
 	cmd.Flags().Bool("override-availability", false, "")
+	cmd.Flags().Bool("reserve-slot", false, "")
+	cmd.Flags().Bool("send-payment-link", true, "")
 	return cmd
 }
 
@@ -74,7 +78,10 @@ func TestBookingCreateBody_SendsOnlyTheRequiredFieldsByDefault(t *testing.T) {
 	cmd := newBookingsCreateTestCmd()
 	setFlags(t, cmd, requiredBookingCreateFlags)
 
-	body := bookingCreateBody(cmd)
+	body, err := bookingCreateBody(cmd)
+	if err != nil {
+		t.Fatalf("body: %v", err)
+	}
 
 	if !reflect.DeepEqual(body, requiredBookingCreateBody) {
 		t.Errorf("body = %v, want %v", body, requiredBookingCreateBody)
@@ -90,7 +97,10 @@ func TestBookingCreateBody_SendsOverrideAvailabilityAndHostEmail(t *testing.T) {
 		"preferred-meeting-spot": "zoom",
 	})
 
-	body := bookingCreateBody(cmd)
+	body, err := bookingCreateBody(cmd)
+	if err != nil {
+		t.Fatalf("body: %v", err)
+	}
 
 	want := map[string]interface{}{
 		"override_availability":  true,
@@ -114,7 +124,10 @@ func TestBookingUpdateBody_SendsOverrideAvailabilityWithTheReschedule(t *testing
 		"override-availability": "true",
 	})
 
-	body := bookingUpdateBody(cmd)
+	body, err := bookingUpdateBody(cmd)
+	if err != nil {
+		t.Fatalf("body: %v", err)
+	}
 
 	want := map[string]interface{}{
 		"slot_date":             "2026-10-05",
@@ -177,7 +190,10 @@ func TestBookingUpdateBody_SendsRescheduleSpotAndOutcome(t *testing.T) {
 		}
 	}
 
-	body := bookingUpdateBody(cmd)
+	body, err := bookingUpdateBody(cmd)
+	if err != nil {
+		t.Fatalf("body: %v", err)
+	}
 
 	want := map[string]interface{}{
 		"slot_date":              "2026-10-06",
@@ -196,7 +212,10 @@ func TestBookingUpdateBody_SendsAnExplicitlyEmptyOutcomeToClearIt(t *testing.T) 
 		t.Fatalf("set meeting-outcome-id: %v", err)
 	}
 
-	body := bookingUpdateBody(cmd)
+	body, err := bookingUpdateBody(cmd)
+	if err != nil {
+		t.Fatalf("body: %v", err)
+	}
 
 	want := map[string]interface{}{"meeting_outcome_id": ""}
 	if !reflect.DeepEqual(body, want) {
@@ -207,9 +226,140 @@ func TestBookingUpdateBody_SendsAnExplicitlyEmptyOutcomeToClearIt(t *testing.T) 
 func TestBookingUpdateBody_OmitsFlagsTheCallerNeverSet(t *testing.T) {
 	cmd := newBookingsUpdateTestCmd()
 
-	body := bookingUpdateBody(cmd)
+	body, err := bookingUpdateBody(cmd)
+	if err != nil {
+		t.Fatalf("body: %v", err)
+	}
 
 	if len(body) != 0 {
 		t.Errorf("body = %v, want empty", body)
+	}
+}
+
+func TestBookingCreateBody_SendsPhoneMetadataFormResponsesAndAddOns(t *testing.T) {
+	cmd := newBookingsCreateTestCmd()
+	setFlags(t, cmd, map[string]string{
+		"meeting-slug":       "meeting-with-oliver",
+		"name":               "Eve Smith",
+		"slot-date":          "2026-10-05",
+		"slot-start-time":    "08:00 PM",
+		"time-zone":          "Asia/Kolkata",
+		"phonenumber":        "+14155550100",
+		"metadata":           `{"source":"crm"}`,
+		"form-responses":     `{"company":"Acme"}`,
+		"add-on-service-ids": "a1,a2",
+		"reserve-slot":       "true",
+		"send-payment-link":  "false",
+	})
+
+	body, err := bookingCreateBody(cmd)
+	if err != nil {
+		t.Fatalf("body: %v", err)
+	}
+
+	want := map[string]interface{}{
+		"meeting_slug":       "meeting-with-oliver",
+		"name":               "Eve Smith",
+		"slot_date":          "2026-10-05",
+		"slot_start_time":    "08:00 PM",
+		"time_zone":          "Asia/Kolkata",
+		"phonenumber":        "+14155550100",
+		"metadata":           map[string]any{"source": "crm"},
+		"form_responses":     map[string]any{"company": "Acme"},
+		"add_on_service_ids": []string{"a1", "a2"},
+		"reserve_slot":       true,
+		"send_payment_link":  false,
+	}
+	if !reflect.DeepEqual(body, want) {
+		t.Errorf("body = %v, want %v", body, want)
+	}
+}
+
+func TestBookingCreateBody_RejectsInvalidMetadata(t *testing.T) {
+	cmd := newBookingsCreateTestCmd()
+	setFlags(t, cmd, map[string]string{"email": "eve@example.com", "metadata": "not json"})
+
+	_, err := bookingCreateBody(cmd)
+
+	if err == nil || !strings.HasPrefix(err.Error(), "--metadata must be a JSON object: ") {
+		t.Errorf("err = %v, want --metadata must be a JSON object", err)
+	}
+}
+
+func TestBookingCreateBody_RejectsInvalidFormResponses(t *testing.T) {
+	cmd := newBookingsCreateTestCmd()
+	setFlags(t, cmd, map[string]string{"email": "eve@example.com", "form-responses": "[1]"})
+
+	_, err := bookingCreateBody(cmd)
+
+	if err == nil || !strings.HasPrefix(err.Error(), "--form-responses must be a JSON object: ") {
+		t.Errorf("err = %v, want --form-responses must be a JSON object", err)
+	}
+}
+
+func TestBookingUpdateBody_SendsPhoneAndMetadata(t *testing.T) {
+	cmd := newBookingsUpdateTestCmd()
+	setFlags(t, cmd, map[string]string{"phonenumber": "+14155550100", "metadata": `{"source":"crm"}`})
+
+	body, err := bookingUpdateBody(cmd)
+	if err != nil {
+		t.Fatalf("body: %v", err)
+	}
+
+	want := map[string]interface{}{"phonenumber": "+14155550100", "metadata": map[string]any{"source": "crm"}}
+	if !reflect.DeepEqual(body, want) {
+		t.Errorf("body = %v, want %v", body, want)
+	}
+}
+
+func TestBookingsListParams_SendsParentBookingID(t *testing.T) {
+	cmd := newBookingsListTestCmd()
+	setFlags(t, cmd, map[string]string{"parent-booking-id": "bkg_1"})
+
+	params := bookingsListParams(cmd)
+
+	if got := params.Get("parent_booking_id"); got != "bkg_1" {
+		t.Errorf("parent_booking_id = %q, want bkg_1", got)
+	}
+}
+
+func TestBookingCreateBody_RequiresEmailOrPhoneNumber(t *testing.T) {
+	cmd := newBookingsCreateTestCmd()
+	setFlags(t, cmd, requiredBookingCreateFlags)
+	setFlags(t, cmd, map[string]string{"email": ""})
+
+	_, err := bookingCreateBody(cmd)
+
+	if err == nil || err.Error() != "pass --email or --phonenumber" {
+		t.Errorf("err = %v, want pass --email or --phonenumber", err)
+	}
+}
+
+func TestBookingCreateBody_AcceptsPhoneNumberWithoutEmail(t *testing.T) {
+	cmd := newBookingsCreateTestCmd()
+	setFlags(t, cmd, requiredBookingCreateFlags)
+	setFlags(t, cmd, map[string]string{"email": "", "phonenumber": "+15551234567"})
+
+	body, err := bookingCreateBody(cmd)
+	if err != nil {
+		t.Fatalf("body: %v", err)
+	}
+
+	if body["phonenumber"] != "+15551234567" {
+		t.Errorf("phonenumber = %v, want +15551234567", body["phonenumber"])
+	}
+	if _, present := body["email"]; present {
+		t.Errorf("email present without --email")
+	}
+}
+
+func TestBookingUpdateBody_RejectsInvalidMetadata(t *testing.T) {
+	cmd := newBookingsUpdateTestCmd()
+	setFlags(t, cmd, map[string]string{"metadata": "not json"})
+
+	_, err := bookingUpdateBody(cmd)
+
+	if err == nil || !strings.HasPrefix(err.Error(), "--metadata must be a JSON object: ") {
+		t.Errorf("err = %v, want --metadata must be a JSON object", err)
 	}
 }
