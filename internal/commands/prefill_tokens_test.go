@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -62,8 +63,10 @@ func TestPrefillTokenBody_RejectsInvalidData(t *testing.T) {
 	cmd := newPrefillTokenTestCmd()
 	setFlags(t, cmd, map[string]string{"data": "nope"})
 
-	if _, err := prefillTokenBody(cmd); err == nil {
-		t.Error("err = nil, want invalid JSON error")
+	_, err := prefillTokenBody(cmd)
+
+	if err == nil || !strings.HasPrefix(err.Error(), "--data must be a JSON object: ") {
+		t.Errorf("err = %v, want --data must be a JSON object", err)
 	}
 }
 
@@ -71,7 +74,9 @@ func TestPrefillTokenBody_RejectsDataAndJSONFileTogether(t *testing.T) {
 	cmd := newPrefillTokenTestCmd()
 	setFlags(t, cmd, map[string]string{"data": `{"name":"Oliver Smith"}`, "json-file": "answers.json"})
 
-	if _, err := prefillTokenBody(cmd); err == nil {
-		t.Error("err = nil, want error when both flags are given")
+	_, err := prefillTokenBody(cmd)
+
+	if err == nil || err.Error() != "pass only one of --data or --json-file" {
+		t.Errorf("err = %v, want pass only one of --data or --json-file", err)
 	}
 }

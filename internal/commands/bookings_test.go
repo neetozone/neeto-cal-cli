@@ -328,8 +328,10 @@ func TestBookingCreateBody_RequiresEmailOrPhoneNumber(t *testing.T) {
 	setFlags(t, cmd, requiredBookingCreateFlags)
 	setFlags(t, cmd, map[string]string{"email": ""})
 
-	if _, err := bookingCreateBody(cmd); err == nil {
-		t.Error("err = nil, want error when neither email nor phonenumber is given")
+	_, err := bookingCreateBody(cmd)
+
+	if err == nil || err.Error() != "pass --email or --phonenumber" {
+		t.Errorf("err = %v, want pass --email or --phonenumber", err)
 	}
 }
 
@@ -338,7 +340,26 @@ func TestBookingCreateBody_AcceptsPhoneNumberWithoutEmail(t *testing.T) {
 	setFlags(t, cmd, requiredBookingCreateFlags)
 	setFlags(t, cmd, map[string]string{"email": "", "phonenumber": "+15551234567"})
 
-	if _, err := bookingCreateBody(cmd); err != nil {
-		t.Errorf("err = %v, want nil", err)
+	body, err := bookingCreateBody(cmd)
+	if err != nil {
+		t.Fatalf("body: %v", err)
+	}
+
+	if body["phonenumber"] != "+15551234567" {
+		t.Errorf("phonenumber = %v, want +15551234567", body["phonenumber"])
+	}
+	if _, present := body["email"]; present {
+		t.Errorf("email present without --email")
+	}
+}
+
+func TestBookingUpdateBody_RejectsInvalidMetadata(t *testing.T) {
+	cmd := newBookingsUpdateTestCmd()
+	setFlags(t, cmd, map[string]string{"metadata": "not json"})
+
+	_, err := bookingUpdateBody(cmd)
+
+	if err == nil || !strings.HasPrefix(err.Error(), "--metadata must be a JSON object: ") {
+		t.Errorf("err = %v, want --metadata must be a JSON object", err)
 	}
 }

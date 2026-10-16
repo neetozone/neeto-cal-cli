@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"net/url"
+	"reflect"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -24,12 +26,11 @@ func TestHolidaysListParams_SendsEveryFilter(t *testing.T) {
 
 	params := holidaysListParams(cmd)
 
-	for param, want := range map[string]string{
-		"search": "offsite", "from_date": "2026-10-01", "to_date": "2026-10-31", "include_disabled": "true",
-	} {
-		if got := params.Get(param); got != want {
-			t.Errorf("%s = %q, want %q", param, got, want)
-		}
+	want := url.Values{
+		"search": {"offsite"}, "from_date": {"2026-10-01"}, "to_date": {"2026-10-31"}, "include_disabled": {"true"},
+	}
+	if !reflect.DeepEqual(params, want) {
+		t.Errorf("params = %v, want %v", params, want)
 	}
 }
 

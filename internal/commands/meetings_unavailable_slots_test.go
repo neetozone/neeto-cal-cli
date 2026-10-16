@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"net/url"
+	"reflect"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -26,13 +28,12 @@ func TestMeetingUnavailableSlotsParams_SendsEveryFlag(t *testing.T) {
 
 	params := meetingUnavailableSlotsParams(cmd)
 
-	for param, want := range map[string]string{
-		"year": "2026", "month": "10", "day": "19", "time_zone": "America/New_York",
-		"host_email": "oliver@example.com", "duration": "60",
-	} {
-		if got := params.Get(param); got != want {
-			t.Errorf("%s = %q, want %q", param, got, want)
-		}
+	want := url.Values{
+		"year": {"2026"}, "month": {"10"}, "day": {"19"}, "time_zone": {"America/New_York"},
+		"host_email": {"oliver@example.com"}, "duration": {"60"},
+	}
+	if !reflect.DeepEqual(params, want) {
+		t.Errorf("params = %v, want %v", params, want)
 	}
 }
 
@@ -42,9 +43,8 @@ func TestMeetingUnavailableSlotsParams_OmitsOptionalFlagsWhenUnset(t *testing.T)
 
 	params := meetingUnavailableSlotsParams(cmd)
 
-	for _, param := range []string{"day", "host_email", "duration"} {
-		if params.Has(param) {
-			t.Errorf("%s = %q, want absent", param, params.Get(param))
-		}
+	want := url.Values{"year": {"2026"}, "month": {"10"}, "time_zone": {"America/New_York"}}
+	if !reflect.DeepEqual(params, want) {
+		t.Errorf("params = %v, want %v", params, want)
 	}
 }

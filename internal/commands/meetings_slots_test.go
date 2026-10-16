@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -77,18 +78,14 @@ func TestMeetingSlotsParams_OmitsOverrideAvailabilityWhenUnset(t *testing.T) {
 
 func TestMeetingSlotsParams_SendsDurationAndAddOnServiceIDs(t *testing.T) {
 	cmd := newMeetingsSlotsTestCmd()
-	for flag, value := range map[string]string{"duration": "60", "add-on-service-ids": "a1,a2"} {
-		if err := cmd.Flags().Set(flag, value); err != nil {
-			t.Fatalf("set %s: %v", flag, err)
-		}
-	}
+	setFlags(t, cmd, map[string]string{"duration": "60", "add-on-service-ids": "a1,a2"})
 
 	params := meetingSlotsParams(cmd)
 
 	if got := params.Get("duration"); got != "60" {
 		t.Errorf("duration = %q, want 60", got)
 	}
-	if got := params["add_on_service_ids[]"]; len(got) != 2 || got[0] != "a1" || got[1] != "a2" {
+	if got := params["add_on_service_ids[]"]; !reflect.DeepEqual(got, []string{"a1", "a2"}) {
 		t.Errorf("add_on_service_ids[] = %v, want [a1 a2]", got)
 	}
 }

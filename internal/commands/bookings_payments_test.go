@@ -47,7 +47,7 @@ func TestBookingPaymentCreateBody_SendsCashAmountAndIdempotencyKey(t *testing.T)
 	}
 }
 
-func TestBookingPaymentCreateBody_SendsTipAttributesOnlyWhenTipValueIsSet(t *testing.T) {
+func TestBookingPaymentCreateBody_SendsTipAttributesWhenTipValueIsSet(t *testing.T) {
 	cmd := newBookingsPaymentsCreateTestCmd()
 	setFlags(t, cmd, map[string]string{"payment-provider": "stripe", "tip-value": "10", "tip-is-custom": "true"})
 
@@ -61,7 +61,10 @@ func TestBookingPaymentCreateBody_SendsTipAttributesOnlyWhenTipValueIsSet(t *tes
 		t.Errorf("body = %v, want %v", body, want)
 	}
 
-	cmd = newBookingsPaymentsCreateTestCmd()
+}
+
+func TestBookingPaymentCreateBody_OmitsTipAttributesWithoutTipValue(t *testing.T) {
+	cmd := newBookingsPaymentsCreateTestCmd()
 	setFlags(t, cmd, map[string]string{"payment-provider": "stripe", "tip-is-custom": "true"})
 
 	if _, present := bookingPaymentCreateBody(cmd)["tip_attributes"]; present {
