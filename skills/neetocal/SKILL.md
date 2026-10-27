@@ -250,6 +250,18 @@ A holiday blocks every host for the whole day unless the host's availability has
 
 Set an outcome on a booking with `bookings update <id> --meeting-outcome-id <id>`.
 
+### Blocked emails
+
+| Command | Positional | Flags |
+|---|---|---|
+| `blocked-emails list` | — | `--search` (matches the address as typed, so Gmail dots and `+tags` do not matter), `--page`, `--page-size` |
+| `blocked-emails show` | `<id>` | — |
+| `blocked-emails create` | — | `--emails*` (comma-separated), `--note` |
+| `blocked-emails update` | `<id>` | `--note*` (pass `""` to clear) |
+| `blocked-emails delete` | `<id>` | — |
+
+A blocked email cannot book a meeting or buy a package. Emails are stored lowercased without `+tags` (and without dots for Gmail). `create` skips emails that are already blocked and returns every requested email.
+
 ### Prefill tokens
 
 | Command | Positional | Flags |
