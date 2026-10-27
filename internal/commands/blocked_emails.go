@@ -97,10 +97,7 @@ var blockedEmailsUpdateCmd = &cobra.Command{
 			return err
 		}
 
-		note, _ := cmd.Flags().GetString("note")
-		body := map[string]interface{}{"blocked_email": map[string]interface{}{"note": note}}
-
-		data, err := c.Put(fmt.Sprintf("/blocked-emails/%s", args[0]), body)
+		data, err := c.Put(fmt.Sprintf("/blocked-emails/%s", args[0]), blockedEmailUpdateBody(cmd))
 		if err != nil {
 			return err
 		}
@@ -108,6 +105,11 @@ var blockedEmailsUpdateCmd = &cobra.Command{
 		printActionResult(data, nil)
 		return nil
 	},
+}
+
+func blockedEmailUpdateBody(cmd *cobra.Command) map[string]interface{} {
+	note, _ := cmd.Flags().GetString("note")
+	return map[string]interface{}{"blocked_email": map[string]interface{}{"note": note}}
 }
 
 var blockedEmailsDeleteCmd = &cobra.Command{

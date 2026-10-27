@@ -40,3 +40,16 @@ func TestBlockedEmailsCreateBody_OmitsUnsetNote(t *testing.T) {
 		t.Errorf("body = %v, want %v", body, want)
 	}
 }
+
+func TestBlockedEmailUpdateBody_SendsEmptyNoteToClearIt(t *testing.T) {
+	cmd := &cobra.Command{Use: "update"}
+	cmd.Flags().String("note", "", "")
+	setFlags(t, cmd, map[string]string{"note": ""})
+
+	body := blockedEmailUpdateBody(cmd)
+
+	want := map[string]interface{}{"blocked_email": map[string]interface{}{"note": ""}}
+	if !reflect.DeepEqual(body, want) {
+		t.Errorf("body = %v, want %v", body, want)
+	}
+}
