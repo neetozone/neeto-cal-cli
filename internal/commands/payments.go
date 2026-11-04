@@ -69,8 +69,8 @@ func addPaymentFilterFlags(cmd *cobra.Command, records, statusHelp string) {
 	cmd.Flags().String("from-time", "", "Only "+records+" made at or after this time (ISO 8601 datetime or YYYY-MM-DD)")
 	cmd.Flags().String("to-time", "", "Only "+records+" made before this time (ISO 8601 datetime or YYYY-MM-DD)")
 	cmd.Flags().String("status", "", statusHelp)
-	cmd.Flags().String("type", "", "Only payments for this: booking or package_purchase")
-	cmd.Flags().String("meeting-sid", "", "Only bookings of this meeting, by SID or slug")
+	cmd.Flags().String("type", "", "Only "+records+" for bookings (booking) or package purchases (package_purchase)")
+	cmd.Flags().String("meeting-sid", "", "Only "+records+" for bookings of this meeting, by SID or slug")
 	addPaginationFlags(cmd)
 }
 
