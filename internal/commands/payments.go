@@ -21,7 +21,7 @@ var paymentsListCmd = &cobra.Command{
 			return err
 		}
 
-		data, err := c.Get("/payments", paymentsListParams(cmd))
+		data, err := c.Get("/payments", paymentFilterParams(cmd))
 		if err != nil {
 			return err
 		}
@@ -45,7 +45,7 @@ var refundsListCmd = &cobra.Command{
 			return err
 		}
 
-		data, err := c.Get("/refunds", refundsListParams(cmd))
+		data, err := c.Get("/refunds", paymentFilterParams(cmd))
 		if err != nil {
 			return err
 		}
@@ -55,17 +55,9 @@ var refundsListCmd = &cobra.Command{
 	},
 }
 
-func paymentsListParams(cmd *cobra.Command) url.Values {
-	return listFilterParams(cmd, "paid-after", "paid-before", "status", "type", "meeting-sid")
-}
-
-func refundsListParams(cmd *cobra.Command) url.Values {
-	return listFilterParams(cmd, "refunded-after", "refunded-before", "status", "type", "meeting-sid")
-}
-
-func listFilterParams(cmd *cobra.Command, flags ...string) url.Values {
+func paymentFilterParams(cmd *cobra.Command) url.Values {
 	params := paginationParams(cmd)
-	for _, flag := range flags {
+	for _, flag := range []string{"from-time", "to-time", "status", "type", "meeting-sid"} {
 		if value, _ := cmd.Flags().GetString(flag); value != "" {
 			params.Set(strings.ReplaceAll(flag, "-", "_"), value)
 		}
@@ -73,7 +65,9 @@ func listFilterParams(cmd *cobra.Command, flags ...string) url.Values {
 	return params
 }
 
-func addPaymentFilterFlags(cmd *cobra.Command, statusHelp string) {
+func addPaymentFilterFlags(cmd *cobra.Command, records, statusHelp string) {
+	cmd.Flags().String("from-time", "", "Only "+records+" made at or after this time (ISO 8601 datetime or YYYY-MM-DD)")
+	cmd.Flags().String("to-time", "", "Only "+records+" made before this time (ISO 8601 datetime or YYYY-MM-DD)")
 	cmd.Flags().String("status", "", statusHelp)
 	cmd.Flags().String("type", "", "Only payments for this: booking or package_purchase")
 	cmd.Flags().String("meeting-sid", "", "Only bookings of this meeting, by SID or slug")
@@ -87,12 +81,8 @@ func init() {
 	})
 
 	paymentsCmd.AddCommand(paymentsListCmd)
-	paymentsListCmd.Flags().String("paid-after", "", "Only payments made at or after this time (ISO 8601 datetime or YYYY-MM-DD)")
-	paymentsListCmd.Flags().String("paid-before", "", "Only payments made before this time (ISO 8601 datetime or YYYY-MM-DD)")
-	addPaymentFilterFlags(paymentsListCmd, "Payment status (default: successful), e.g. declined, pending")
+	addPaymentFilterFlags(paymentsListCmd, "payments", "Payment status (default: successful), e.g. declined, pending")
 
 	refundsCmd.AddCommand(refundsListCmd)
-	refundsListCmd.Flags().String("refunded-after", "", "Only refunds made at or after this time (ISO 8601 datetime or YYYY-MM-DD)")
-	refundsListCmd.Flags().String("refunded-before", "", "Only refunds made before this time (ISO 8601 datetime or YYYY-MM-DD)")
-	addPaymentFilterFlags(refundsListCmd, "Refund status (default: successful), e.g. pending, declined")
+	addPaymentFilterFlags(refundsListCmd, "refunds", "Refund status (default: successful), e.g. pending, declined")
 }

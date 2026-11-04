@@ -6,30 +6,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newListFilterTestCmd(flags ...string) *cobra.Command {
+func TestPaymentFilterParams_SendsFilters(t *testing.T) {
 	cmd := &cobra.Command{Use: "list"}
-	for _, flag := range flags {
-		cmd.Flags().String(flag, "", "")
-	}
-	addPaginationFlags(cmd)
-	return cmd
-}
-
-func TestPaymentsListParams_SendsFilters(t *testing.T) {
-	cmd := newListFilterTestCmd("paid-after", "paid-before", "status", "type", "meeting-sid")
+	addPaymentFilterFlags(cmd, "payments", "")
 	setFlags(t, cmd, map[string]string{
-		"paid-after":  "2026-10-01",
-		"paid-before": "2026-11-01",
+		"from-time":   "2026-10-01",
+		"to-time":     "2026-11-01",
 		"status":      "declined",
 		"type":        "package_purchase",
 		"meeting-sid": "abc123x",
 	})
 
-	params := paymentsListParams(cmd)
+	params := paymentFilterParams(cmd)
 
 	for param, want := range map[string]string{
-		"paid_after":  "2026-10-01",
-		"paid_before": "2026-11-01",
+		"from_time":   "2026-10-01",
+		"to_time":     "2026-11-01",
 		"status":      "declined",
 		"type":        "package_purchase",
 		"meeting_sid": "abc123x",
@@ -40,18 +32,13 @@ func TestPaymentsListParams_SendsFilters(t *testing.T) {
 	}
 }
 
-func TestRefundsListParams_SendsFilters(t *testing.T) {
-	cmd := newListFilterTestCmd("refunded-after", "refunded-before", "status", "type", "meeting-sid")
-	setFlags(t, cmd, map[string]string{"refunded-after": "2026-10-01", "refunded-before": "2026-11-01"})
+func TestPaymentFilterParams_OmitsUnsetFilters(t *testing.T) {
+	cmd := &cobra.Command{Use: "list"}
+	addPaymentFilterFlags(cmd, "refunds", "")
 
-	params := refundsListParams(cmd)
+	params := paymentFilterParams(cmd)
 
-	for param, want := range map[string]string{"refunded_after": "2026-10-01", "refunded_before": "2026-11-01"} {
-		if got := params.Get(param); got != want {
-			t.Errorf("%s = %q, want %q", param, got, want)
-		}
-	}
-	if params.Has("status") {
-		t.Errorf("status = %q, want unset", params.Get("status"))
+	if len(params) != 0 {
+		t.Errorf("params = %v, want empty", params)
 	}
 }
