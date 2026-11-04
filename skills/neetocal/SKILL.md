@@ -280,6 +280,15 @@ Returns a token. Append it to a booking link as `?prefill_token=<token>` to open
 | `packages purchases show` | `<package-id> <purchase-id>` | — |
 | `discount-codes create` | — | `--code*`, `--kind*` (`percentage`/`fixed`), `--value*` (float), `--meeting-ids` (csv), `--expires-at` (ISO date) |
 
+### Payments & refunds
+
+| Command | Positional | Flags |
+|---|---|---|
+| `payments list` | — | `--from-time`, `--to-time` (ISO 8601 datetime or `YYYY-MM-DD`), `--status` (default `successful`), `--type` (`booking`/`package_purchase`), `--meeting-sid`, `--page`, `--page-size` |
+| `refunds list` | — | `--from-time`, `--to-time` (ISO 8601 datetime or `YYYY-MM-DD`), `--status` (default `successful`), `--type` (`booking`/`package_purchase`), `--meeting-sid`, `--page`, `--page-size` |
+
+Use these for payment reports over a date range. `--from-time` is inclusive and `--to-time` is exclusive. Each payment lists its refunds and `refunded_amount`; each refund includes the refunded payment. Refunds that are not successful yet are filtered by when they were requested. `--meeting-sid` returns booking payments only. Users with only "view own payments" get payments of the bookings they host.
+
 ### Diagnostics & IDE setup
 
 | Command | Purpose |
